@@ -3,10 +3,21 @@
     <h1>🐍 贪吃蛇大作战</h1>
     <div class="menu">
       <router-link to="/game" class="btn classic">🎮 经典模式</router-link>
+      <button class="btn daily" @click="goDaily">📅 每日挑战</button>
       <router-link to="/leaderboard" class="btn leaderboard">🏆 查看排行榜</router-link>
     </div>
   </div>
 </template>
+
+<script setup>
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
+const goDaily = () => {
+  // 带上 mode 参数跳转
+  router.push({ path: '/game', query: { mode: 'daily' } });
+};
+</script>
 
 <style scoped>
 .home-view {
@@ -41,5 +52,8 @@ h1 {
 }
 .leaderboard {
   background: #2196f3;
+}
+.daily {
+  background: #ff9800;
 }
 </style>

@@ -1,9 +1,15 @@
 // src/game/SnakeEngine.js
 
+import { createSeededRandom } from './PRNG';
+
 export class SnakeEngine {
-  constructor(gridSize = 20, canvasSize = 400) {
+  // 构造函数增加 seed 参数
+  constructor(gridSize = 20, canvasSize = 400, seed = null) {
     this.gridSize = gridSize;
     this.canvasSize = canvasSize;
+
+    // 如果有种子，就用伪随机；否则用真随机
+    this.randomFunc = seed !== null ? createSeededRandom(seed) : Math.random;
     this.reset();
   }
 
@@ -18,34 +24,25 @@ export class SnakeEngine {
 
   // 随机生成食物，且不能生成在蛇身上
   spawnFood() {
-    const freeCells = [];
+    let newFood;
+    let isOverlapping = true;
     const cols = this.canvasSize / this.gridSize;
     const rows = this.canvasSize / this.gridSize;
 
-    // 遍历整个画布的每一个格子
-    for (let x = 0; x < cols; x++) {
-      for (let y = 0; y < rows; y++) {
-        const px = x * this.gridSize;
-        const py = y * this.gridSize;
+    while (isOverlapping) {
+      newFood = {
+        // 【核心修改】换成 this.randomFunc()
+        x: Math.floor(this.randomFunc() * cols) * this.gridSize,
+        y: Math.floor(this.randomFunc() * rows) * this.gridSize,
+      };
 
-        // 检查这个格子是否被蛇身占据
-        const isOccupied = this.snake.some((segment) => segment.x === px && segment.y === py);
+      const onSnake = this.snake.some(
+        (segment) => segment.x === newFood.x && segment.y === newFood.y
+      );
 
-        // 如果没被占据，就把它加进“空闲池”
-        if (!isOccupied) {
-          freeCells.push({ x: px, y: py });
-        }
-      }
+      if (!onSnake) isOverlapping = false;
     }
-
-    // 如果还有空闲格子，从里面随机抽一个
-    if (freeCells.length > 0) {
-      const randomIndex = Math.floor(Math.random() * freeCells.length);
-      this.food = freeCells[randomIndex];
-    } else {
-      // 通关了！所有格子都被蛇填满了
-      this.isGameOver = true;
-    }
+    this.food = newFood;
   }
 
   // 改变方向（防止 180 度掉头）
