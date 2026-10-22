@@ -190,11 +190,11 @@ export function useSnakeGame() {
   // ==========================================
   // 核心业务：提交分数
   // ==========================================
+  // 只贴出修改的 submitScore 部分
   const submitScore = async (playerName) => {
-    if (!currentGameId) return false;
-    if (isSubmitting) return false; // 【修复】防止玩家狂点提交按钮狂发请求
-
+    if (!currentGameId || isSubmitting) return false;
     isSubmitting = true;
+
     try {
       const response = await fetch(`${API_BASE}/api/score`, {
         method: 'POST',
@@ -204,16 +204,16 @@ export function useSnakeGame() {
           name: playerName,
           score: score.value,
           mode: currentMode.value,
+          seed: engine.seed, // 传种子
+          actions: engine.actions, // 传操作记录
         }),
       });
-
-      // 如果后端返回 403 或 400，这里 response.ok 为 false，返回 false 给 UI 层处理
       return response.ok;
     } catch (error) {
-      console.error('提交分数网络异常:', error);
+      console.error(error);
       return false;
     } finally {
-      isSubmitting = false; // 无论成败，必须解锁
+      isSubmitting = false;
     }
   };
 
