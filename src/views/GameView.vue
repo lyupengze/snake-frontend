@@ -20,6 +20,8 @@
         <h2>💀 游戏结束</h2>
         <p class="final-score">最终得分: {{ score }}</p>
         <input v-model="playerName" placeholder="输入你的名字" maxlength="10" />
+
+        <!-- 【核心修改】加上 :disabled="isSubmitting" -->
         <button class="action-btn" @click="saveScore" :disabled="isSubmitting">
           {{ isSubmitting ? '提交中...' : '提交排行榜' }}
         </button>
