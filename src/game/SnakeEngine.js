@@ -79,19 +79,25 @@ export class SnakeEngine {
     if (this.direction === 'UP') newHead.y -= this.gridSize;
     if (this.direction === 'DOWN') newHead.y += this.gridSize;
 
+    // 【修复】判断是否会吃到食物
+    const ateFood = newHead.x === this.food.x && newHead.y === this.food.y;
+
+    // 【修复】如果没吃到食物，尾巴会同时移开，因此不用检测当前蛇尾的位置
+    const snakeToCheck = ateFood ? this.snake : this.snake.slice(0, -1);
+
     if (
       newHead.x < 0 ||
       newHead.x >= this.canvasSize ||
       newHead.y < 0 ||
       newHead.y >= this.canvasSize ||
-      this.snake.some((segment) => segment.x === newHead.x && segment.y === newHead.y)
+      snakeToCheck.some((segment) => segment.x === newHead.x && segment.y === newHead.y)
     ) {
       this.isGameOver = true;
       return;
     }
 
     this.snake.unshift(newHead);
-    if (newHead.x === this.food.x && newHead.y === this.food.y) {
+    if (ateFood) {
       this.score += 1;
       this.spawnFood();
     } else {
