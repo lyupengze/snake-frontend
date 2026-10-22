@@ -1,7 +1,7 @@
 import { ref, onUnmounted } from 'vue';
 import { SnakeEngine } from '../game/SnakeEngine';
 import { Renderer } from '../game/Renderer';
-import { request } from '../utils/api'; // 引入统一适配器
+import { request } from '../utils/api'; // 引入你的统一网络适配器
 
 export function useSnakeGame() {
   const gameStatus = ref('idle');
@@ -13,6 +13,7 @@ export function useSnakeGame() {
   let animationFrameId = null;
   let lastUpdateTime = 0;
   const TICK_INTERVAL = 150;
+
   let currentGameId = null;
   let isStarting = false;
   let isSubmitting = false;
@@ -87,61 +88,31 @@ export function useSnakeGame() {
   // ==========================================
   // 启动逻辑
   // ==========================================
-  const startGame = async (canvasElement) => {
+  const startGame = async (canvasElement, mode = 'classic') => {
     if (isStarting) return;
     isStarting = true;
-    currentMode.value = 'classic';
+    currentMode.value = mode;
 
     try {
+      // 只发这一个请求，告诉后端我要玩什么模式
       const res = await request(`/api/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: mode }),
       });
-      // 【修复】严格检查 HTTP 状态码
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      if (!res.ok) throw new Error('Network error');
+
       const data = await res.json();
       currentGameId = data.gameId;
+      const serverSeed = data.seed;
+      if (typeof data.seed !== 'number') {
+        throw new Error('Invalid seed from server');
+      }
+      initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed));
     } catch (e) {
       alert('无法连接服务器！');
       isStarting = false;
-      return;
     }
-
-    initAndRun(canvasElement, new SnakeEngine());
-    isStarting = false;
-  };
-
-  const startDailyChallenge = async (canvasElement) => {
-    if (isStarting) return;
-    isStarting = true;
-    currentMode.value = 'daily';
-
-    let seed = null;
-    try {
-      const [seedRes, startRes] = await Promise.all([
-        request(`/api/daily-seed`),
-        request(`/api/start`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        }),
-      ]);
-
-      // 【修复】双请求严格校验
-      if (!seedRes.ok || !startRes.ok) throw new Error('API Error');
-
-      const seedData = await seedRes.json();
-      const startData = await startRes.json();
-
-      seed = seedData.seed;
-      currentGameId = startData.gameId;
-    } catch (e) {
-      alert('无法获取每日挑战数据！');
-      isStarting = false;
-      return;
-    }
-
-    initAndRun(canvasElement, new SnakeEngine(20, 400, seed));
-    isStarting = false;
   };
 
   // 抽离公共初始化逻辑，保持代码 DRY
@@ -202,9 +173,7 @@ export function useSnakeGame() {
           gameId: currentGameId,
           name: playerName,
           score: score.value,
-          mode: currentMode.value,
-          seed: engine.seed, // 传种子
-          actions: engine.actions, // 传操作记录
+          actions: engine.actions, // 【核心】只传操作记录，不传 seed 了
         }),
       });
       return response.ok;
@@ -219,8 +188,7 @@ export function useSnakeGame() {
   return {
     score,
     gameStatus,
-    startGame,
-    startDailyChallenge,
+    startGame, // 只暴露这一个
     stopGame,
     submitScore,
   };

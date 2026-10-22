@@ -19,7 +19,7 @@
       <div v-if="gameStatus === 'gameover'" class="overlay">
         <h2>💀 游戏结束</h2>
         <p class="final-score">最终得分: {{ score }}</p>
-        <input v-model="playerName" placeholder="输入你的名字" maxlength="10" />
+        <input v-model="playerName" placeholder="输入你的名字" maxlength="20" />
 
         <!-- 【核心修改】加上 :disabled="isSubmitting" -->
         <button class="action-btn" @click="saveScore" :disabled="isSubmitting">
@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted } from 'vue'; // 去掉了 onMounted
+import { ref, onUnmounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useSnakeGame } from '../composables/useSnakeGame';
 
@@ -43,17 +43,14 @@ const playerName = ref('');
 const isSubmitting = ref(false);
 
 // 判断 URL 里是否有 mode=daily
-const isDailyMode = route.query.mode === 'daily';
+const isDailyMode = computed(() => route.query.mode === 'daily');
 
-const { score, gameStatus, startGame, startDailyChallenge, stopGame, submitScore } = useSnakeGame();
+const { score, gameStatus, startGame, stopGame, submitScore } = useSnakeGame();
 
 // 根据模式调用不同的启动函数
 const handleStart = async () => {
-  if (!canvasRef.value) return;
-  if (isDailyMode) {
-    await startDailyChallenge(canvasRef.value);
-  } else {
-    await startGame(canvasRef.value);
+  if (canvasRef.value) {
+    await startGame(canvasRef.value, isDailyMode.value ? 'daily' : 'classic');
   }
 };
 
@@ -64,7 +61,10 @@ const saveScore = async () => {
 
   const success = await submitScore(playerName.value);
   if (success) {
-    router.push('/leaderboard');
+    router.push({
+      path: '/leaderboard',
+      query: { mode: isDailyMode.value ? 'daily' : 'classic' },
+    });
   } else {
     alert('提交失败！');
     isSubmitting.value = false;

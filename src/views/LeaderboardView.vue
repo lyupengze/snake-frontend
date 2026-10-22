@@ -2,13 +2,17 @@
   <div class="leaderboard-view">
     <h1>🏆 全球排行榜</h1>
     <div class="leaderboard-wrapper">
-      <Leaderboard />
+      <Leaderboard :initialMode="initialMode" />
     </div>
     <router-link to="/" class="back-link">⬅️ 返回主页</router-link>
   </div>
 </template>
-
 <script setup>
+import { useRoute } from 'vue-router';
+const route = useRoute();
+// 传给组件或者直接在这里设定
+import { computed } from 'vue';
+const initialMode = computed(() => route.query.mode || 'classic');
 import Leaderboard from '../components/Leaderboard.vue';
 </script>
 

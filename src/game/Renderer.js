@@ -1,25 +1,20 @@
 export class Renderer {
+  // src/game/Renderer.js
   constructor(canvas, gridSize = 20) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.gridSize = gridSize;
 
-    // 【修复 2】提前算好，避免在每秒 60 帧的循环里重复计算
     this.padding = 1;
     this.size = this.gridSize - this.padding * 2;
 
-    // 【修复 1】适配高分屏，并保存逻辑宽高
+    // 【核心修复】强制逻辑尺寸为 400x400，不随 CSS 变化
+    this.logicalWidth = 400;
+    this.logicalHeight = 400;
+
     const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-
-    this.logicalWidth = rect.width || 400;
-    this.logicalHeight = rect.height || 400;
-
-    // 设置物理像素尺寸
     canvas.width = this.logicalWidth * dpr;
     canvas.height = this.logicalHeight * dpr;
-
-    // 放大画布上下文，让内部坐标和逻辑像素 1:1 对应
     this.ctx.scale(dpr, dpr);
   }
 

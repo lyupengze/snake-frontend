@@ -4,13 +4,13 @@ export class SnakeEngine {
   constructor(gridSize = 20, canvasSize = 400, seed = null) {
     this.gridSize = gridSize;
     this.canvasSize = canvasSize;
-    // 如果没传种子（经典模式），就在本地随机生成一个，发给后端重放用
-    this.seed = seed !== null ? seed : Math.floor(Math.random() * 1000000);
+    this.seed = seed;
     this.randomFunc = createSeededRandom(this.seed);
     this.reset();
   }
 
   reset() {
+    this.randomFunc = createSeededRandom(this.seed);
     this.snake = [{ x: 200, y: 200 }];
     this.direction = 'RIGHT';
     this.directionQueue = [];

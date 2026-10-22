@@ -25,8 +25,15 @@
 import { ref, onMounted } from 'vue';
 import { request } from '../utils/api'; // 引入统一适配器
 
+const props = defineProps({
+  initialMode: {
+    type: String,
+    default: 'classic',
+  },
+});
+
 const list = ref([]);
-const currentMode = ref('classic');
+const currentMode = ref(props.initialMode);
 
 const fetchLeaderboard = async () => {
   try {
@@ -38,7 +45,6 @@ const fetchLeaderboard = async () => {
     list.value = [];
   }
 };
-// ...
 
 const switchMode = (mode) => {
   currentMode.value = mode;
