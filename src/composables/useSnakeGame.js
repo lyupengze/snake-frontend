@@ -1,22 +1,21 @@
 import { ref, onUnmounted } from 'vue';
 import { SnakeEngine } from '../game/SnakeEngine';
 import { Renderer } from '../game/Renderer';
+import { request } from '../utils/api'; // 引入统一适配器
 
 export function useSnakeGame() {
   const gameStatus = ref('idle');
   const score = ref(0);
   const currentMode = ref('classic');
-  const API_BASE = '';
 
   let engine = null;
   let renderer = null;
   let animationFrameId = null;
   let lastUpdateTime = 0;
-  const TICK_INTERVAL = 150; // 毫秒/格
-
+  const TICK_INTERVAL = 150;
   let currentGameId = null;
   let isStarting = false;
-  let isSubmitting = false; // 【修复】防连点提交锁
+  let isSubmitting = false;
   let canvasEl = null;
 
   // ==========================================
@@ -94,7 +93,7 @@ export function useSnakeGame() {
     currentMode.value = 'classic';
 
     try {
-      const res = await fetch(`${API_BASE}/api/start`, {
+      const res = await request(`/api/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -120,8 +119,8 @@ export function useSnakeGame() {
     let seed = null;
     try {
       const [seedRes, startRes] = await Promise.all([
-        fetch(`${API_BASE}/api/daily-seed`),
-        fetch(`${API_BASE}/api/start`, {
+        request(`/api/daily-seed`),
+        request(`/api/start`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         }),
@@ -196,7 +195,7 @@ export function useSnakeGame() {
     isSubmitting = true;
 
     try {
-      const response = await fetch(`${API_BASE}/api/score`, {
+      const response = await request(`/api/score`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

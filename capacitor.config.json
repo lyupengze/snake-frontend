@@ -1,0 +1,10 @@
+{
+  "appId": "com.spamtonneo.snake",
+  "appName": "snake-game",
+  "webDir": "dist",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

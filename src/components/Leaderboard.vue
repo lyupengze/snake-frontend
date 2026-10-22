@@ -23,13 +23,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { request } from '../utils/api'; // 引入统一适配器
 
 const list = ref([]);
-const currentMode = ref('classic'); // 默认经典榜
+const currentMode = ref('classic');
 
 const fetchLeaderboard = async () => {
   try {
-    const res = await fetch(`/api/leaderboard?mode=${currentMode.value}`);
+    const res = await request(`/api/leaderboard?mode=${currentMode.value}`);
     const json = await res.json();
     list.value = json.data || [];
   } catch (e) {
@@ -37,6 +38,7 @@ const fetchLeaderboard = async () => {
     list.value = [];
   }
 };
+// ...
 
 const switchMode = (mode) => {
   currentMode.value = mode;
