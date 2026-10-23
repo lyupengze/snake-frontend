@@ -1,6 +1,6 @@
 {
   "appId": "com.spamtonneo.snake",
-  "appName": "snake-game",
+  "appName": "贪吃蛇大作战",
   "webDir": "dist",
   "plugins": {
     "CapacitorHttp": {
