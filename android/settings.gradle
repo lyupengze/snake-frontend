@@ -1,5 +1,10 @@
+// ==========================================
+// Android 工程全局设置
+// ==========================================
+
 pluginManagement {
     repositories {
+        // [国内加速] 配置阿里云镜像源
         maven { url 'https://maven.aliyun.com/repository/google' }
         maven { url 'https://maven.aliyun.com/repository/public' }
         maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
@@ -8,7 +13,8 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    // 【核心修改】把 FAIL_ON_PROJECT_REPOS 改成 PREFER_SETTINGS，允许 flatDir 存在
+    // [关键配置] Capacitor 或其插件有时会使用本地 flatDir (如 libs 目录下的 .aar 文件)。
+    // 默认的 FAIL_ON_PROJECT_REPOS 会导致构建报错，改为 PREFER_SETTINGS 兼容这种引入方式。
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         maven { url 'https://maven.aliyun.com/repository/google' }
@@ -17,8 +23,12 @@ dependencyResolutionManagement {
     }
 }
 
+// 包含主应用模块
 include ':app'
+
+// 包含 Capacitor 的 Cordova 兼容层模块
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = file('./capacitor-cordova-android-plugins/')
 
+// 引入 Capacitor 自动生成的 Gradle 配置（包含具体的原生插件列表）
 apply from: 'capacitor.settings.gradle'

@@ -1,21 +1,27 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// ==========================================
+// Android 根级构建配置文件
+// ==========================================
 
 buildscript {
+    // [国内加速] 优先使用阿里云镜像源，大幅加快 Gradle 依赖的下载速度
     repositories {
         maven { url 'https://maven.aliyun.com/repository/google' }
         maven { url 'https://maven.aliyun.com/repository/public' }
         maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
     }
+
     dependencies {
+        // Android Gradle 插件版本
         classpath 'com.android.tools.build:gradle:8.13.0'
+        // Google 服务插件 (通常用于 Firebase/推送，若未使用可移除)
         classpath 'com.google.gms:google-services:4.4.4'
     }
 }
 
+// 引入项目级全局变量配置 (如 SDK 版本号、依赖版本等)
 apply from: "variables.gradle"
 
-// 删除了原来的 allprojects 块，因为 settings.gradle 里已经统一配置了
-
+// 定义一个 clean 任务，用于清理构建产物 (相当于手动执行 rm -rf build/)
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

@@ -10,6 +10,11 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
 
+        <!--
+          [核心配置] MainActivity 是 Capacitor 应用的主入口。
+          configChanges: 拦截屏幕旋转、键盘弹出等事件，防止 Activity 重建导致 WebView 重新加载（游戏被强制中断）。
+          launchMode="singleTask": 确保应用只保留一个实例，避免从后台切回时多开。
+        -->
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
@@ -25,6 +30,7 @@
 
         </activity>
 
+        <!-- FileProvider：用于在应用间安全地共享文件（Android 7.0+ 强制要求） -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -36,7 +42,9 @@
         </provider>
     </application>
 
-    <!-- Permissions -->
-
+    <!-- ==========================================
+         权限声明
+         ========================================== -->
+    <!-- [必须] 访问网络权限。没有它，CapacitorHttp 无法请求后端 API -->
     <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
