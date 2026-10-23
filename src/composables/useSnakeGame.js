@@ -109,8 +109,10 @@ export function useSnakeGame() {
         throw new Error('Invalid seed from server');
       }
       initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed));
+      isStarting = false; // 新增
     } catch (e) {
       alert('无法连接服务器！');
+      currentGameId = null; // 新增：清理未完成的 session 引用
       isStarting = false;
     }
   };
@@ -176,7 +178,9 @@ export function useSnakeGame() {
           actions: engine.actions, // 【核心】只传操作记录，不传 seed 了
         }),
       });
-      return response.ok;
+      const ok = response.ok;
+      currentGameId = null; // 无论成功失败，只要拿到了服务器响应就清空
+      return ok;
     } catch (error) {
       console.error(error);
       return false;
