@@ -1,26 +1,38 @@
 <template>
   <div class="leaderboard-view">
     <h1>🏆 全球排行榜</h1>
+
     <div class="leaderboard-wrapper">
+      <!-- 渲染核心榜单组件，并将解析出的 mode 传给它 -->
       <Leaderboard :initialMode="initialMode" />
     </div>
+
     <router-link to="/" class="back-link">⬅️ 返回主页</router-link>
   </div>
 </template>
+
 <script setup>
-import { useRoute } from 'vue-router';
-const route = useRoute();
-// 传给组件或者直接在这里设定
 import { computed } from 'vue';
-const initialMode = computed(() => route.query.mode || 'classic');
+import { useRoute } from 'vue-router';
 import Leaderboard from '../components/Leaderboard.vue';
+
+const route = useRoute();
+
+/**
+ * 从 URL 查询参数中解析榜单模式。
+ * 若未传参或参数非法，则默认展示经典模式 (classic) 排行榜。
+ */
+const initialMode = computed(() => route.query.mode || 'classic');
 </script>
 
 <style scoped>
+/* ==========================================
+   页面主容器
+   ========================================== */
 .leaderboard-view {
   display: flex;
   flex-direction: column;
-  align-items: center; /* 让里面的东西全部水平居中 */
+  align-items: center;
   padding: 40px 20px;
   min-height: 100vh;
   box-sizing: border-box;
@@ -32,12 +44,18 @@ h1 {
   font-size: 32px;
 }
 
-/* 给排行榜一个最大宽度，防止在电脑上被拉得太宽 */
+/* ==========================================
+   内容区域限制
+   ========================================== */
+/* 限制最大宽度，防止在桌面端大屏幕上榜单被横向拉伸过长 */
 .leaderboard-wrapper {
   width: 100%;
   max-width: 500px;
 }
 
+/* ==========================================
+   返回链接
+   ========================================== */
 .back-link {
   margin-top: 40px;
   color: #aaa;

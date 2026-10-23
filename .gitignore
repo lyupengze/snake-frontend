@@ -1,4 +1,24 @@
-# Logs
+# ==========================================
+# 依赖与构建产物
+# ==========================================
+node_modules
+dist
+dist-ssr
+*.local
+
+# ==========================================
+# 环境变量文件
+# ==========================================
+# [说明] 忽略本地环境和生产环境配置。
+# .env.development 会提交到仓库供统一开发使用，
+# 而 .env.production 根据具体部署环境生成（例如服务器构建时直接取 Nginx 同源，而不写死 IP）。
+.env.production
+.env.local
+.env.*.local
+
+# ==========================================
+# 日志文件
+# ==========================================
 logs
 *.log
 npm-debug.log*
@@ -7,16 +27,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-.env.production
-.env.local
-.env.*.local
-
-# Editor directories and files
+# ==========================================
+# 编辑器与系统文件
+# ==========================================
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -27,11 +40,15 @@ dist-ssr
 *.sln
 *.sw?
 
-# Tauri
+# ==========================================
+# Tauri (桌面端)
+# ==========================================
 src-tauri/target/
 src-tauri/gen/
 
-# Capacitor / Android
+# ==========================================
+# Capacitor / Android (移动端)
+# ==========================================
 android/.gradle/
 android/build/
 android/app/build/

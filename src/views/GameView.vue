@@ -7,7 +7,7 @@
     <div class="canvas-wrapper">
       <canvas ref="canvasRef" width="400" height="400" class="game-canvas"></canvas>
 
-      <!-- 状态 1：待开始 -->
+      <!-- 状态 1：等待开始 -->
       <div v-if="gameStatus === 'idle'" class="overlay">
         <h2>准备开始</h2>
         <button class="action-btn" @click="handleStart">
@@ -15,18 +15,19 @@
         </button>
       </div>
 
-      <!-- 状态 2：游戏结束 -->
+      <!-- 状态 2：游戏结束，展示结算与提交表单 -->
       <div v-if="gameStatus === 'gameover'" class="overlay">
         <h2>💀 游戏结束</h2>
         <p class="final-score">最终得分: {{ score }}</p>
         <input v-model="playerName" placeholder="输入你的名字" maxlength="20" />
 
-        <!-- 【核心修改】加上 :disabled="isSubmitting" -->
+        <!-- 提交按钮：通过 isSubmitting 控制防止用户双击重复提交 -->
         <button class="action-btn" @click="saveScore" :disabled="isSubmitting">
           {{ isSubmitting ? '提交中...' : '提交排行榜' }}
         </button>
       </div>
     </div>
+
     <router-link to="/" class="back-link">⬅️ 返回主页</router-link>
   </div>
 </template>
@@ -36,50 +37,72 @@ import { ref, onUnmounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useSnakeGame } from '../composables/useSnakeGame';
 
+// 路由与 DOM 引用
 const router = useRouter();
 const route = useRoute();
 const canvasRef = ref(null);
+
+// 组件局部状态
 const playerName = ref('');
 const isSubmitting = ref(false);
 
-// 判断 URL 里是否有 mode=daily
+// 根据 URL 参数判断当前是否为每日挑战模式
 const isDailyMode = computed(() => route.query.mode === 'daily');
 
+// 引入游戏核心逻辑
 const { score, gameStatus, startGame, stopGame, submitScore } = useSnakeGame();
 
-// 根据模式调用不同的启动函数
+/**
+ * 启动游戏
+ */
 const handleStart = async () => {
   if (canvasRef.value) {
     await startGame(canvasRef.value, isDailyMode.value ? 'daily' : 'classic');
   }
 };
 
+/**
+ * 保存并提交分数
+ */
 const saveScore = async () => {
-  if (!playerName.value) return alert('请输入名字');
-  if (isSubmitting.value) return;
+  if (!playerName.value) {
+    return alert('请输入名字');
+  }
+  if (isSubmitting.value) {
+    return;
+  }
+
   isSubmitting.value = true;
 
+  // 调用 Composable 层的提交逻辑
   const success = await submitScore(playerName.value);
+
   if (success) {
+    // 提交成功，跳转至对应的排行榜
     router.push({
       path: '/leaderboard',
       query: { mode: isDailyMode.value ? 'daily' : 'classic' },
     });
   } else {
+    // TODO: 后续将在此处解析后端返回的具体错误原因，并提供更友好的 UI 提示
     alert('提交失败！');
     isSubmitting.value = false;
   }
 };
 
+// 组件卸载时确保停止游戏循环并释放资源
 onUnmounted(() => stopGame());
 </script>
 
 <style scoped>
+/* ==========================================
+   页面主容器
+   ========================================== */
 .game-view {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 20px; /* 减小顶部间距 */
+  padding-top: 20px;
   min-height: 100vh;
   box-sizing: border-box;
 }
@@ -91,9 +114,12 @@ onUnmounted(() => stopGame());
   margin-bottom: 15px;
 }
 
+/* ==========================================
+   画布与遮罩层
+   ========================================== */
 .canvas-wrapper {
   position: relative;
-  /* 让 wrapper 也自适应，保证遮罩层能覆盖全画布 */
+  /* 容器宽度自适应，确保遮罩层能与画布完美对齐 */
   width: 100%;
   max-width: 400px;
   display: flex;
@@ -104,12 +130,14 @@ onUnmounted(() => stopGame());
   border: 2px solid #555;
   background-color: #000;
   display: block;
+  /* 禁用移动端默认触摸行为（如滚动、缩放），保证手势顺滑 */
   touch-action: none;
-  /* 核心自适应逻辑 */
+
+  /* 响应式自适应逻辑 */
   width: 100%;
   max-width: 400px;
   height: auto;
-  aspect-ratio: 1 / 1; /* 强制保持正方形 */
+  aspect-ratio: 1 / 1; /* 强制保持 1:1 正方形 */
 }
 
 .overlay {
@@ -124,17 +152,26 @@ onUnmounted(() => stopGame());
   justify-content: center;
   align-items: center;
   gap: 15px;
-  border-radius: 4px; /* 如果画布有圆角，遮罩也跟上 */
+  border-radius: 4px;
 }
 
+/* ==========================================
+   交互控件
+   ========================================== */
 .action-btn {
-  padding: 12px 28px; /* 手机端按钮稍微大一点点，更好点 */
+  padding: 12px 28px;
   font-size: 18px;
   background: #4caf50;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .overlay input {
@@ -162,14 +199,19 @@ onUnmounted(() => stopGame());
   padding: 10px;
 }
 
-/* 针对小屏幕（手机）的微调 */
+/* ==========================================
+   移动端屏幕适配
+   ========================================== */
 @media (max-width: 480px) {
   .score-board {
-    font-size: 18px; /* 字体稍微小一点 */
+    font-size: 18px;
     margin-bottom: 10px;
   }
   .game-view {
     padding-top: 10px;
+  }
+  .action-btn {
+    padding: 14px 32px; /* 移动端增大触控区域 */
   }
 }
 </style>

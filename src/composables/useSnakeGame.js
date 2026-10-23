@@ -1,10 +1,14 @@
 import { ref, onUnmounted } from 'vue';
 import { SnakeEngine } from '../game/SnakeEngine';
 import { Renderer } from '../game/Renderer';
-import { request } from '../utils/api'; // 引入你的统一网络适配器
+import { request } from '../utils/api';
 
+/**
+ * 贪吃蛇游戏 Vue Composable
+ * 负责将 SnakeEngine 与 Vue 的响应式状态、Canvas 渲染以及后端 API 连接起来。
+ */
 export function useSnakeGame() {
-  const gameStatus = ref('idle');
+  const gameStatus = ref('idle'); // idle | playing | gameover
   const score = ref(0);
   const currentMode = ref('classic');
 
@@ -12,16 +16,18 @@ export function useSnakeGame() {
   let renderer = null;
   let animationFrameId = null;
   let lastUpdateTime = 0;
-  const TICK_INTERVAL = 150;
+  const TICK_INTERVAL = 150; // 一帧 150ms
 
+  // 状态锁与上下文变量
   let currentGameId = null;
-  let isStarting = false;
-  let isSubmitting = false;
+  let isStarting = false; // 防止重复发起 start 请求
+  let isSubmitting = false; // 防止重复提交分数
   let canvasEl = null;
 
   // ==========================================
-  // 事件监听（具名函数，为了能被正确解绑）
+  // 键盘与触摸事件监听
   // ==========================================
+
   const handleKeydown = (e) => {
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
     if (!engine) return;
@@ -33,6 +39,7 @@ export function useSnakeGame() {
 
   let touchStartX = 0;
   let touchStartY = 0;
+
   const handleTouchStart = (e) => {
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
@@ -45,6 +52,7 @@ export function useSnakeGame() {
     const dx = touchEndX - touchStartX;
     const dy = touchEndY - touchStartY;
 
+    // 忽略过小的滑动（误触）
     if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
 
     if (Math.abs(dx) > Math.abs(dy)) {
@@ -56,12 +64,13 @@ export function useSnakeGame() {
     }
   };
 
-  // 【修复】具名函数，彻底告别内存泄漏
+  // 阻止移动端滑动时页面跟着滚动
   const handleTouchMove = (e) => e.preventDefault();
 
   // ==========================================
   // 游戏主循环 (requestAnimationFrame)
   // ==========================================
+
   const gameLoop = (timestamp) => {
     if (gameStatus.value !== 'playing') return;
 
@@ -70,14 +79,13 @@ export function useSnakeGame() {
       score.value = engine.score;
 
       if (engine.isGameOver) {
-        gameStatus.value = 'gameover'; // 先标记结束
-        stopGame(true); // 【修复】传入 true，告诉它保留 gameover 状态
+        gameStatus.value = 'gameover';
+        stopGame(true); // 传入 true 表示游戏结束，保留 gameover 状态
         renderer.draw(engine);
         return;
       }
-      // ...
 
-      // 补偿误差
+      // 帧率补偿机制：防止由于 requestAnimationFrame 触发间隔不精准导致的游戏变慢
       lastUpdateTime = timestamp - ((timestamp - lastUpdateTime) % TICK_INTERVAL);
     }
 
@@ -86,15 +94,16 @@ export function useSnakeGame() {
   };
 
   // ==========================================
-  // 启动逻辑
+  // 启动与初始化
   // ==========================================
+
   const startGame = async (canvasElement, mode = 'classic') => {
     if (isStarting) return;
     isStarting = true;
     currentMode.value = mode;
 
     try {
-      // 只发这一个请求，告诉后端我要玩什么模式
+      // [网络请求] 向服务器申请开局，获取服务器下发的权威 seed
       const res = await request(`/api/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -105,21 +114,22 @@ export function useSnakeGame() {
       const data = await res.json();
       currentGameId = data.gameId;
       const serverSeed = data.seed;
+
       if (typeof data.seed !== 'number') {
         throw new Error('Invalid seed from server');
       }
+
       initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed));
-      isStarting = false; // 新增
     } catch (e) {
       alert('无法连接服务器！');
-      currentGameId = null; // 新增：清理未完成的 session 引用
-      isStarting = false;
+      currentGameId = null; // 清理可能产生的无用 gameId
+    } finally {
+      isStarting = false; // [历史Bug修复] 无论成功失败都要解锁，否则无法连开第二局
     }
   };
 
-  // 抽离公共初始化逻辑，保持代码 DRY
   const initAndRun = (canvasElement, newEngine) => {
-    stopGame(); // 【修复】先清理上一局的残余监听器
+    stopGame(); // 先清理上一局的残余监听器
     canvasEl = canvasElement;
     engine = newEngine;
     renderer = new Renderer(canvasElement);
@@ -136,9 +146,9 @@ export function useSnakeGame() {
   };
 
   // ==========================================
-  // 销毁逻辑
+  // 销毁与清理
   // ==========================================
-  // 接收一个参数，默认是 false（代表不是游戏结束，而是主动退出）
+
   const stopGame = (isGameOver = false) => {
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
     window.removeEventListener('keydown', handleKeydown);
@@ -148,13 +158,12 @@ export function useSnakeGame() {
       canvasEl.removeEventListener('touchmove', handleTouchMove);
     }
 
-    // 【核心修复】只有不是因为游戏结束而停止时，才重置为 idle
+    // 主动退出时才重置为 idle，如果是死亡触发的，则保留 gameover 状态供 UI 展示
     if (!isGameOver) {
       gameStatus.value = 'idle';
     }
   };
 
-  // 【修复】组件销毁时，自动清理所有内存
   onUnmounted(() => {
     stopGame();
   });
@@ -162,7 +171,7 @@ export function useSnakeGame() {
   // ==========================================
   // 核心业务：提交分数
   // ==========================================
-  // 只贴出修改的 submitScore 部分
+
   const submitScore = async (playerName) => {
     if (!currentGameId || isSubmitting) return false;
     isSubmitting = true;
@@ -175,11 +184,13 @@ export function useSnakeGame() {
           gameId: currentGameId,
           name: playerName,
           score: score.value,
-          actions: engine.actions, // 【核心】只传操作记录，不传 seed 了
+          actions: engine.actions, // [防作弊核心] 只传操作记录，后端用真实 seed 重放验证分数
         }),
       });
+
       const ok = response.ok;
-      currentGameId = null; // 无论成功失败，只要拿到了服务器响应就清空
+      // [历史Bug修复] 只要拿到了服务器响应就清空 gameId，防止用户双击导致重复提交
+      currentGameId = null;
       return ok;
     } catch (error) {
       console.error(error);
@@ -192,7 +203,7 @@ export function useSnakeGame() {
   return {
     score,
     gameStatus,
-    startGame, // 只暴露这一个
+    startGame,
     stopGame,
     submitScore,
   };
