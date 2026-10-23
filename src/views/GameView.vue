@@ -29,6 +29,9 @@
     </div>
 
     <router-link to="/" class="back-link">⬅️ 返回主页</router-link>
+
+    <!-- 引入全局轻提示组件 -->
+    <Toast ref="toastRef" />
   </div>
 </template>
 
@@ -36,20 +39,16 @@
 import { ref, onUnmounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useSnakeGame } from '../composables/useSnakeGame';
+import Toast from '../components/Toast.vue'; // 引入 Toast 组件
 
-// 路由与 DOM 引用
 const router = useRouter();
 const route = useRoute();
 const canvasRef = ref(null);
-
-// 组件局部状态
 const playerName = ref('');
 const isSubmitting = ref(false);
+const toastRef = ref(null); // 绑定 Toast 组件引用
 
-// 根据 URL 参数判断当前是否为每日挑战模式
 const isDailyMode = computed(() => route.query.mode === 'daily');
-
-// 引入游戏核心逻辑
 const { score, gameStatus, startGame, stopGame, submitScore } = useSnakeGame();
 
 /**
@@ -57,36 +56,53 @@ const { score, gameStatus, startGame, stopGame, submitScore } = useSnakeGame();
  */
 const handleStart = async () => {
   if (canvasRef.value) {
-    await startGame(canvasRef.value, isDailyMode.value ? 'daily' : 'classic');
+    const result = await startGame(canvasRef.value, isDailyMode.value ? 'daily' : 'classic');
+
+    // 如果启动失败，用 Toast 提示玩家
+    if (!result.success) {
+      toastRef.value?.show(result.message);
+    }
   }
 };
 
 /**
- * 保存并提交分数
+ * 保存并提交分数（含详细的状态码处理与 UI 提示）
  */
 const saveScore = async () => {
+  // [校验] 前置表单校验，使用 Toast 替代原生 alert
   if (!playerName.value) {
-    return alert('请输入名字');
+    return toastRef.value?.show('请输入名字');
   }
-  if (isSubmitting.value) {
-    return;
-  }
+  if (isSubmitting.value) return;
 
   isSubmitting.value = true;
 
-  // 调用 Composable 层的提交逻辑
-  const success = await submitScore(playerName.value);
+  // 调用 Composable 层提交，获取包含状态码的结果
+  const result = await submitScore(playerName.value);
 
-  if (success) {
-    // 提交成功，跳转至对应的排行榜
-    router.push({
-      path: '/leaderboard',
-      query: { mode: isDailyMode.value ? 'daily' : 'classic' },
-    });
+  if (result.success) {
+    toastRef.value?.show('🎉 提交成功！');
+
+    // [UX 优化] 延迟 800ms 跳转，给玩家时间看完“提交成功”的提示
+    setTimeout(() => {
+      router.push({
+        path: '/leaderboard',
+        query: { mode: isDailyMode.value ? 'daily' : 'classic' },
+      });
+    }, 800);
   } else {
-    // TODO: 后续将在此处解析后端返回的具体错误原因，并提供更友好的 UI 提示
-    alert('提交失败！');
+    // [异常处理] 提交失败，恢复按钮可点击状态，并根据后端返回的 HTTP 状态码给出精确提示
     isSubmitting.value = false;
+
+    if (result.status === 403) {
+      toastRef.value?.show('❌ 校验未通过（疑似作弊或会话过期）');
+    } else if (result.status === 413) {
+      toastRef.value?.show('⏱️ 游戏时间过长，未能上榜');
+    } else if (result.status === 400) {
+      toastRef.value?.show('⚠️ 提交的数据不合法');
+    } else {
+      toastRef.value?.show('📡 网络连接失败，请检查网络后重试');
+    }
   }
 };
 

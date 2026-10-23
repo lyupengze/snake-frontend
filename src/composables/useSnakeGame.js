@@ -93,12 +93,15 @@ export function useSnakeGame() {
     animationFrameId = requestAnimationFrame(gameLoop);
   };
 
-  // ==========================================
-  // 启动与初始化
-  // ==========================================
-
+  /**
+   * 启动游戏并获取服务器下发的权威 seed
+   *
+   * @param {HTMLCanvasElement} canvasElement 画布 DOM
+   * @param {string} mode 游戏模式 (classic/daily)
+   * @returns {Promise<{success: boolean, message?: string}>} 启动结果
+   */
   const startGame = async (canvasElement, mode = 'classic') => {
-    if (isStarting) return;
+    if (isStarting) return { success: false, message: '正在启动中，请勿重复点击' };
     isStarting = true;
     currentMode.value = mode;
 
@@ -120,9 +123,11 @@ export function useSnakeGame() {
       }
 
       initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed));
+      return { success: true };
     } catch (e) {
-      alert('无法连接服务器！');
+      console.error('[API Error] 启动游戏失败:', e);
       currentGameId = null; // 清理可能产生的无用 gameId
+      return { success: false, message: '无法连接服务器，请稍后重试' };
     } finally {
       isStarting = false; // [历史Bug修复] 无论成功失败都要解锁，否则无法连开第二局
     }
@@ -168,12 +173,21 @@ export function useSnakeGame() {
     stopGame();
   });
 
-  // ==========================================
-  // 核心业务：提交分数
-  // ==========================================
-
+  /**
+   * 提交游戏分数到服务器进行重放校验
+   *
+   * [架构设计]
+   * 返回值不再是简单的 boolean，而是包含 { success, status } 的对象。
+   * 这是为了将 HTTP 状态码透传给 UI 层（GameView），以便根据不同错误提供精确的用户提示。
+   *
+   * @param {string} playerName 玩家昵称
+   * @returns {Promise<{success: boolean, status: number}>} 包含成功状态和 HTTP 状态码的结果
+   */
   const submitScore = async (playerName) => {
-    if (!currentGameId || isSubmitting) return false;
+    // [并发控制] 如果正在提交或没有有效的 GameID，直接拦截
+    if (!currentGameId || isSubmitting) {
+      return { success: false, status: 400 };
+    }
     isSubmitting = true;
 
     try {
@@ -184,17 +198,21 @@ export function useSnakeGame() {
           gameId: currentGameId,
           name: playerName,
           score: score.value,
-          actions: engine.actions, // [防作弊核心] 只传操作记录，后端用真实 seed 重放验证分数
+          actions: engine.actions, // 携带完整操作序列供后端重放
         }),
       });
 
       const ok = response.ok;
-      // [历史Bug修复] 只要拿到了服务器响应就清空 gameId，防止用户双击导致重复提交
+
+      // [状态清理] 只要拿到了服务器响应（无论成功还是被防作弊拦截），都清空 gameId 防止双击重复提交
       currentGameId = null;
-      return ok;
+
+      // 透传后端返回的 HTTP 状态码（如 403, 413, 400）
+      return { success: ok, status: response.status };
     } catch (error) {
-      console.error(error);
-      return false;
+      console.error('[API Error] 提交分数失败:', error);
+      // 状态码 0 代表网络层异常（如断网、跨域失败）
+      return { success: false, status: 0 };
     } finally {
       isSubmitting = false;
     }
