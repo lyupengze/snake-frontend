@@ -1,8 +1,14 @@
 <template>
   <div class="game-view">
-    <h2 class="score-board">
-      {{ isDailyMode ? '📅 每日挑战' : '🎮 经典模式' }} - 得分: {{ score }}
-    </h2>
+    <div class="header">
+      <h2 class="score-board">
+        {{ isDailyMode ? '📅 每日挑战' : '🎮 经典模式' }} - 得分: {{ score }}
+      </h2>
+      <!-- 静音开关 -->
+      <button class="mute-btn" @click="toggleMute">
+        {{ isMuted ? '🔇' : '🔊' }}
+      </button>
+    </div>
 
     <div class="canvas-wrapper">
       <canvas ref="canvasRef" width="400" height="400" class="game-canvas"></canvas>
@@ -40,6 +46,7 @@ import { ref, onUnmounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useSnakeGame } from '../composables/useSnakeGame';
 import Toast from '../components/Toast.vue'; // 引入 Toast 组件
+import { audioManager } from '../utils/audio'; // 引入音频管理器
 
 const router = useRouter();
 const route = useRoute();
@@ -47,9 +54,15 @@ const canvasRef = ref(null);
 const playerName = ref('');
 const isSubmitting = ref(false);
 const toastRef = ref(null); // 绑定 Toast 组件引用
+const isMuted = ref(audioManager.isMuted);
 
 const isDailyMode = computed(() => route.query.mode === 'daily');
 const { score, gameStatus, startGame, stopGame, submitScore } = useSnakeGame();
+
+// 切换静音
+const toggleMute = () => {
+  isMuted.value = audioManager.toggleMute();
+};
 
 /**
  * 启动游戏
@@ -123,11 +136,34 @@ onUnmounted(() => stopGame());
   box-sizing: border-box;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  position: relative;
+}
+
 .score-board {
   color: #4caf50;
   font-size: 22px;
-  margin-top: 0;
-  margin-bottom: 15px;
+  margin: 0; /* 覆盖原本的 margin */
+}
+
+.mute-btn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
+  opacity: 0.8;
+  transition: transform 0.2s;
+}
+
+.mute-btn:hover {
+  transform: scale(1.1);
+  opacity: 1;
 }
 
 /* ==========================================

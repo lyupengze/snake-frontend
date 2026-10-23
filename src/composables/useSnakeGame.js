@@ -2,6 +2,7 @@ import { ref, onUnmounted } from 'vue';
 import { SnakeEngine } from '../game/SnakeEngine';
 import { Renderer } from '../game/Renderer';
 import { request } from '../utils/api';
+import { audioManager } from '../utils/audio';
 
 /**
  * 贪吃蛇游戏 Vue Composable
@@ -75,12 +76,20 @@ export function useSnakeGame() {
     if (gameStatus.value !== 'playing') return;
 
     if (timestamp - lastUpdateTime >= TICK_INTERVAL) {
+      const prevScore = engine.score;
       engine.update();
+
+      // 如果分数增加，说明吃到了食物
+      if (engine.score > prevScore) {
+        audioManager.playEat();
+      }
+
       score.value = engine.score;
 
       if (engine.isGameOver) {
         gameStatus.value = 'gameover';
-        stopGame(true); // 传入 true 表示游戏结束，保留 gameover 状态
+        audioManager.playDie(); // 播放死亡音效
+        stopGame(true);
         renderer.draw(engine);
         return;
       }
@@ -104,6 +113,9 @@ export function useSnakeGame() {
     if (isStarting) return { success: false, message: '正在启动中，请勿重复点击' };
     isStarting = true;
     currentMode.value = mode;
+
+    // [关键] 用户点击开始，解锁浏览器的音频上下文
+    audioManager.init();
 
     try {
       // [网络请求] 向服务器申请开局，获取服务器下发的权威 seed
