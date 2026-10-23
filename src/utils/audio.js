@@ -1,66 +1,114 @@
 /**
- * 游戏音效管理器 (基于 Web Audio API)
+ * 游戏音效管理器 (基于 Web Audio API - AudioBuffer 极速版)
+ *
+ * [针对移动端优化]
+ * 1. 使用 AudioBufferSourceNode 替代 OscillatorNode，消除部分安卓/鸿蒙 WebView 的节点创建延迟。
+ * 2. 引入“心跳保活”机制，初始化时启动一个极微弱的超声波，强行阻止底层音频驱动休眠。
+ *
+ * TODO: 移动端（Android / HarmonyOS WebView）存在 3~4 秒的音频延迟。
+ * 原因是手机系统的音频硬件休眠唤醒机制与 AudioContext 虚拟时钟存在漂移冲突。
+ * 后续优化方向：可尝试改用 HTML5 <audio> 标签播放动态生成的 WAV 文件流，绕过 Web Audio 的虚拟时钟限制。
  */
 class AudioManager {
   constructor() {
     this.ctx = null;
     this.isMuted = localStorage.getItem('snake_muted') === 'true';
+    this.heartbeatNode = null;
+    this.heartbeatGain = null;
+
+    // 预生成的音频缓存
+    this.eatBuffer = null;
+    this.dieBuffer = null;
+
+    // 监听页面可见性变化（解决手机切后台后的音频挂起）
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && this.ctx) {
+        this.ctx.resume();
+      }
+    });
   }
 
   init() {
     if (!this.ctx) {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       this.ctx = new AudioContext();
+
+      // [核心优化 1] 预先生成音效 Buffer，避免播放时主线程卡顿
+      this.eatBuffer = this.generateBuffer(400, 1200, 0.12, 'square', 0.15);
+      this.dieBuffer = this.generateBuffer(300, 50, 0.4, 'sawtooth', 0.1);
     }
+
+    // [强行唤醒]
     if (this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
-  }
 
-  playTone(freqStart, freqEnd, duration, type = 'sine', vol = 0.3) {
-    if (this.isMuted || !this.ctx) return;
-
-    const osc = this.ctx.createOscillator();
-    const gainNode = this.ctx.createGain();
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(freqStart, this.ctx.currentTime);
-    if (freqEnd) {
-      osc.frequency.exponentialRampToValueAtTime(freqEnd, this.ctx.currentTime + duration);
+    // [移动端延迟修复] 启动心跳保活 (20000Hz 超声波，人耳听不到)
+    if (!this.heartbeatNode) {
+      this.heartbeatNode = this.ctx.createOscillator();
+      this.heartbeatGain = this.ctx.createGain();
+      this.heartbeatNode.type = 'sine';
+      this.heartbeatNode.frequency.value = 20000;
+      this.heartbeatGain.gain.value = 0.0001;
+      this.heartbeatNode.connect(this.heartbeatGain);
+      this.heartbeatGain.connect(this.ctx.destination);
+      this.heartbeatNode.start();
     }
-
-    // 音量包络：保持设定音量一段时间，然后快速衰减，听起来更干脆
-    gainNode.gain.setValueAtTime(vol, this.ctx.currentTime);
-    gainNode.gain.setValueAtTime(vol, this.ctx.currentTime + duration * 0.2); // 前20%时间保持最大音量
-    gainNode.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
-
-    osc.connect(gainNode);
-    gainNode.connect(this.ctx.destination);
-
-    osc.start();
-    osc.stop(this.ctx.currentTime + duration);
-
-    // [核心修复] 声音播放完毕后，立刻销毁节点，释放资源，防止后续音效失效
-    osc.onended = () => {
-      osc.disconnect();
-      gainNode.disconnect();
-    };
   }
 
   /**
-   * 播放吃食物音效（高频、干脆、穿透力强）
+   * 内部方法：计算并生成音频 Buffer
    */
+  generateBuffer(freqStart, freqEnd, duration, type, vol) {
+    const sampleRate = this.ctx.sampleRate;
+    const bufferSize = sampleRate * duration;
+    const buffer = this.ctx.createBuffer(1, bufferSize, sampleRate);
+    const data = buffer.getChannelData(0);
+    let phase = 0;
+
+    for (let i = 0; i < bufferSize; i++) {
+      const t = i / sampleRate;
+      const progress = t / duration;
+      const currentFreq = freqStart + (freqEnd - freqStart) * progress;
+
+      phase += (2 * Math.PI * currentFreq) / sampleRate;
+
+      let sample = 0;
+      if (type === 'square') sample = Math.sin(phase) > 0 ? 1 : -1;
+      else if (type === 'sawtooth')
+        sample = 2 * (phase / (2 * Math.PI) - Math.floor(phase / (2 * Math.PI) + 0.5));
+      else if (type === 'triangle')
+        sample =
+          2 * Math.abs(2 * (phase / (2 * Math.PI) - Math.floor(phase / (2 * Math.PI) + 0.5))) - 1;
+      else sample = Math.sin(phase);
+
+      let envelope = 1;
+      if (progress > 0.8) {
+        envelope = Math.max(0, 1 - (progress - 0.8) / 0.2);
+      }
+
+      data[i] = sample * vol * envelope;
+    }
+    return buffer;
+  }
+
   playEat() {
-    // 频率跨度大（400->1200），方波，时长 0.15s，音量拉满到 0.8
-    this.playTone(400, 1200, 0.15, 'square', 0.8);
+    if (this.isMuted || !this.ctx || !this.eatBuffer) return;
+
+    // [核心优化 2] 直接使用预生成的 Buffer 播放，零延迟
+    const source = this.ctx.createBufferSource();
+    source.buffer = this.eatBuffer;
+    source.connect(this.ctx.destination);
+    source.start(0);
   }
 
-  /**
-   * 播放游戏结束音效（沉闷、下降）
-   */
   playDie() {
-    // 降低初始音量到 0.3，避免震耳欲聋
-    this.playTone(300, 50, 0.5, 'sawtooth', 0.3);
+    if (this.isMuted || !this.ctx || !this.dieBuffer) return;
+
+    const source = this.ctx.createBufferSource();
+    source.buffer = this.dieBuffer;
+    source.connect(this.ctx.destination);
+    source.start(0);
   }
 
   toggleMute() {
