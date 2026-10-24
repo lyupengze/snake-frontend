@@ -116,6 +116,8 @@ const saveScore = async () => {
 
     if (result.status === 403) {
       toastRef.value?.show('❌ 校验未通过（疑似作弊或会话过期）');
+    } else if (result.status === 429) {
+      toastRef.value?.show('🚦 请求过于频繁，请稍后再试'); // [新增] Nginx 限流
     } else if (result.status === 413) {
       toastRef.value?.show('⏱️ 游戏时间过长，未能上榜');
     } else if (result.status === 400) {
