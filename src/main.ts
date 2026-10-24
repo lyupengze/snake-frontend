@@ -9,7 +9,7 @@ import router from './router'; // 引入路由配置
  */
 const app = createApp(App);
 
-// 启用 Vue Router，使应用具备前端路由能力（如 /leaderboard 页面）
+// 启用 Vue Router，使应用具备前端路由能力
 app.use(router);
 
 // 将应用挂载到 DOM

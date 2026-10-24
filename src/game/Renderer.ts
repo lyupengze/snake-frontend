@@ -1,19 +1,48 @@
+import type { Point } from './SnakeEngine';
+
+interface ThemePalette {
+  head: string;
+  body: string;
+  glow: string;
+  food: string;
+}
+
+export type ThemeName = 'classic' | 'cyber' | 'lava' | 'sakura' | 'toxic';
+
 /**
  * Canvas 渲染引擎
+ * 负责 Retina 高清屏适配、皮肤绘制以及穿墙空间裂隙特效。
  */
 export class Renderer {
-  constructor(canvas, gridSize = 20, theme = 'classic', mode = 'classic') {
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private gridSize: number;
+  private theme: string;
+  private mode: string;
+
+  private padding: number;
+  private size: number;
+  private logicalWidth: number = 400;
+  private logicalHeight: number = 400;
+
+  private themes: Record<ThemeName, ThemePalette>;
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    gridSize = 20,
+    theme = 'classic',
+    mode: string = 'classic'
+  ) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
+    this.ctx = canvas.getContext('2d')!;
     this.gridSize = gridSize;
     this.theme = theme;
     this.mode = mode;
 
     this.padding = 1;
     this.size = this.gridSize - this.padding * 2;
-    this.logicalWidth = 400;
-    this.logicalHeight = 400;
 
+    // [Retina 适配] 放大实际渲染分辨率，缩放绘图上下文
     const dpr = window.devicePixelRatio || 1;
     canvas.width = this.logicalWidth * dpr;
     canvas.height = this.logicalHeight * dpr;
@@ -28,30 +57,32 @@ export class Renderer {
     };
   }
 
-  draw(state) {
-    const palette = this.themes[this.theme] || this.themes.classic;
+  public draw(state: {
+    snake: Point[];
+    food: Point;
+    wrapEffect: { edge: string; timestamp: number } | null;
+  }): void {
+    const palette = this.themes[this.theme as ThemeName] || this.themes.classic;
     const now = performance.now();
 
     // 1. 清屏
     this.ctx.fillStyle = '#121212';
     this.ctx.fillRect(0, 0, this.logicalWidth, this.logicalHeight);
 
-    // 2. [物理平滑特效] 空间裂隙
+    // 2. 穿墙特效 (基于物理时间的平滑渐隐)
     if (this.mode === 'wrap' && state.wrapEffect) {
       const elapsed = now - state.wrapEffect.timestamp;
-      const duration = 400; // 特效持续 400 毫秒
+      const duration = 400;
 
       if (elapsed < duration) {
         this.ctx.save();
-
-        // 线性插值：透明度从 1 平滑衰减到 0（不卡顿了）
         const alpha = 1 - elapsed / duration;
         this.ctx.globalAlpha = alpha;
 
         const edge = state.wrapEffect.edge;
-        const thickness = 40; // 加厚光带
+        const thickness = 40;
 
-        let grad;
+        let grad: CanvasGradient;
         let rectX = 0,
           rectY = 0,
           rectW = 0,
@@ -82,7 +113,7 @@ export class Renderer {
           grad.addColorStop(1, 'transparent');
           rectW = this.logicalWidth;
           rectH = thickness;
-        } else if (edge === 'bottom') {
+        } else {
           grad = this.ctx.createLinearGradient(
             0,
             this.logicalHeight,
@@ -102,7 +133,7 @@ export class Renderer {
       }
     }
 
-    // 3. 画食物
+    // 3. 绘制食物
     if (state.food) {
       this.ctx.save();
       this.ctx.fillStyle = palette.food;
@@ -112,7 +143,7 @@ export class Renderer {
       this.ctx.restore();
     }
 
-    // 4. 画蛇
+    // 4. 绘制蛇
     state.snake.forEach((segment, index) => {
       if (index === 0) {
         this.ctx.fillStyle = palette.head;

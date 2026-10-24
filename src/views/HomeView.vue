@@ -15,14 +15,13 @@
       <div v-if="!env?.isNative" class="download-section">
         <div class="divider">—— 客户端下载 ——</div>
         <div class="download-links">
-          <a href="/downloads/app-debug.apk" target="_blank" class="download-btn android">
+          <!-- 安卓版 -->
+          <a href="/downloads/snake-battle-latest.apk" target="_blank" class="download-btn android">
             🤖 下载安卓版 (APK)
           </a>
-          <a
-            href="/downloads/SnakeBattle_0.1.0_x64_en-US.msi"
-            target="_blank"
-            class="download-btn windows"
-          >
+
+          <!-- 桌面版 -->
+          <a href="/downloads/snake-battle-latest.msi" target="_blank" class="download-btn windows">
             💻 下载桌面版 (Windows)
           </a>
         </div>
