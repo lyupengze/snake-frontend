@@ -63,3 +63,10 @@ export async function request(url, options = {}) {
   // 3. Web 浏览器端：使用原生 fetch
   return window.fetch(fullUrl, options);
 }
+
+// [新增] 导出环境判断，供 UI 层根据平台差异化渲染
+export const env = {
+  isTauri,
+  isCapacitor,
+  isNative,
+};
