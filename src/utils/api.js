@@ -10,7 +10,9 @@ const ENV_API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 // 探测当前运行环境（Tauri 桌面端 / Capacitor 移动端）
 const isTauri = typeof window !== 'undefined' && !!window.__TAURI_INTERNALS__;
-const isCapacitor = typeof window !== 'undefined' && window.Capacitor && window.Capacitor.isNative;
+// [修复] 使用 Capacitor 官方推荐的 getPlatform 接口，兼容所有版本
+const isCapacitor =
+  typeof window !== 'undefined' && window.Capacitor && window.Capacitor.getPlatform() !== 'web';
 const isNative = isTauri || isCapacitor;
 
 // [Fail-Fast 机制] 原生端打包时如果漏配 VITE_API_BASE_URL，直接阻断运行，防止带病上线

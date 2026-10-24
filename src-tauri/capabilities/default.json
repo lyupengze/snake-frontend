@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "主窗口的默认安全权限配置，包含允许发起的 HTTP 请求白名单",
+  "description": "Capability for the main window",
   "windows": ["main"],
   "permissions": [
     "core:default",
@@ -10,7 +10,7 @@
       "identifier": "http:allow-fetch",
       "allow": [
         {
-          "url": "http://39.106.162.26/api/*"
+          "url": "http://39.106.162.26/*"
         }
       ]
     }
