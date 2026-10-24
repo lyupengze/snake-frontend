@@ -3,13 +3,10 @@
     <h1>🐍 贪吃蛇大作战</h1>
 
     <div class="menu">
-      <!-- 经典模式：直接跳转，无额外参数 -->
       <router-link to="/game" class="btn classic">🎮 经典模式</router-link>
-
-      <!-- 每日挑战：通过按钮触发带参跳转 -->
       <button class="btn daily" @click="goDaily">📅 每日挑战</button>
-
-      <!-- 排行榜：跳转至全局榜单页面 -->
+      <!-- [新增] 穿墙模式 -->
+      <button class="btn wrap" @click="goWrap">🌀 穿墙模式</button>
       <router-link to="/leaderboard" class="btn leaderboard">🏆 查看排行榜</router-link>
     </div>
   </div>
@@ -26,6 +23,10 @@ const router = useRouter();
  */
 const goDaily = () => {
   router.push({ path: '/game', query: { mode: 'daily' } });
+};
+
+const goWrap = () => {
+  router.push({ path: '/game', query: { mode: 'wrap' } });
 };
 </script>
 
@@ -84,5 +85,10 @@ h1 {
 
 .daily {
   background: #ff9800; /* 每日挑战：橙色 */
+}
+
+/* 在 <style> 中新增 */
+.wrap {
+  background: #9c27b0; /* 紫色主题 */
 }
 </style>

@@ -8,6 +8,10 @@
       <button :class="{ active: currentMode === 'daily' }" @click="switchMode('daily')">
         📅 每日榜
       </button>
+      <!-- [新增] 穿墙榜 -->
+      <button :class="{ active: currentMode === 'wrap' }" @click="switchMode('wrap')">
+        🌀 穿墙榜
+      </button>
     </div>
 
     <!-- 排行榜列表 -->

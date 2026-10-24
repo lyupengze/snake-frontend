@@ -134,7 +134,7 @@ export function useSnakeGame() {
         throw new Error('Invalid seed from server');
       }
 
-      initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed));
+      initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed, mode));
       return { success: true };
     } catch (e) {
       console.error('[API Error] 启动游戏失败:', e);

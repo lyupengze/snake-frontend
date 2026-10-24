@@ -1,9 +1,7 @@
 <template>
   <div class="game-view">
     <div class="header">
-      <h2 class="score-board">
-        {{ isDailyMode ? '📅 每日挑战' : '🎮 经典模式' }} - 得分: {{ score }}
-      </h2>
+      <h2 class="score-board">{{ modeText }} - 得分: {{ score }}</h2>
       <!-- 静音开关 -->
       <button class="mute-btn" @click="toggleMute">
         {{ isMuted ? '🔇' : '🔊' }}
@@ -57,7 +55,15 @@ const toastRef = ref(null); // 绑定 Toast 组件引用
 const isMuted = ref(audioManager.isMuted);
 
 const isDailyMode = computed(() => route.query.mode === 'daily');
+const isWrapMode = computed(() => route.query.mode === 'wrap'); // [新增]
 const { score, gameStatus, startGame, stopGame, submitScore } = useSnakeGame();
+
+// 文本显示逻辑
+const modeText = computed(() => {
+  if (isDailyMode.value) return '📅 每日挑战';
+  if (isWrapMode.value) return '🌀 穿墙模式';
+  return '🎮 经典模式';
+});
 
 // 切换静音
 const toggleMute = () => {
@@ -69,7 +75,8 @@ const toggleMute = () => {
  */
 const handleStart = async () => {
   if (canvasRef.value) {
-    const result = await startGame(canvasRef.value, isDailyMode.value ? 'daily' : 'classic');
+    const currentMode = isDailyMode.value ? 'daily' : isWrapMode.value ? 'wrap' : 'classic';
+    const result = await startGame(canvasRef.value, currentMode);
 
     // 如果启动失败，用 Toast 提示玩家
     if (!result.success) {
@@ -100,7 +107,7 @@ const saveScore = async () => {
     setTimeout(() => {
       router.push({
         path: '/leaderboard',
-        query: { mode: isDailyMode.value ? 'daily' : 'classic' },
+        query: { mode: route.query.mode || 'classic' },
       });
     }, 800);
   } else {
