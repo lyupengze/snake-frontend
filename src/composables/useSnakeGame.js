@@ -90,6 +90,10 @@ export function useSnakeGame() {
         audioManager.playEat();
       }
 
+      if (engine.justWrapped) {
+        audioManager.playWarp();
+      }
+
       score.value = engine.score;
 
       if (engine.isGameOver) {

@@ -36,6 +36,7 @@ class AudioManager {
       // [核心优化 1] 预先生成音效 Buffer，避免播放时主线程卡顿
       this.eatBuffer = this.generateBuffer(400, 1200, 0.12, 'square', 0.15);
       this.dieBuffer = this.generateBuffer(300, 50, 0.4, 'sawtooth', 0.1);
+      this.warpBuffer = this.generateWarpBuffer();
     }
 
     // [强行唤醒]
@@ -92,6 +93,42 @@ class AudioManager {
     return buffer;
   }
 
+  /**
+   * [专属定制] 生成穿墙的"吸溜"音效（下坠式气哨 + 瞬态起音）
+   */
+  generateWarpBuffer() {
+    const sampleRate = this.ctx.sampleRate;
+    const duration = 0.2; // 0.2秒的吸入感
+    const bufferSize = sampleRate * duration;
+    const buffer = this.ctx.createBuffer(1, bufferSize, sampleRate);
+    const data = buffer.getChannelData(0);
+    let phase = 0;
+
+    for (let i = 0; i < bufferSize; i++) {
+      const t = i / sampleRate;
+      const progress = t / duration;
+
+      // 核心变化：频率从 1500Hz 快速下坠到 100Hz，模拟被吸进管道的空间感
+      // 使用了 Math.pow(progress, 0.4) 让下降曲线更急促
+      const currentFreq = 1500 - 1400 * Math.pow(progress, 0.4);
+      phase += (2 * Math.PI * currentFreq) / sampleRate;
+
+      // 正弦波最像纯净的气哨声
+      let sample = Math.sin(phase);
+
+      // 包络：极短的起音（瞬间爆发吸力），然后快速衰减
+      let envelope = 0;
+      if (progress < 0.05) {
+        envelope = progress / 0.05;
+      } else {
+        envelope = Math.pow(1 - (progress - 0.05) / 0.95, 2);
+      }
+
+      data[i] = sample * envelope * 0.6;
+    }
+    return buffer;
+  }
+
   playEat() {
     if (this.isMuted || !this.ctx || !this.eatBuffer) return;
 
@@ -107,6 +144,15 @@ class AudioManager {
 
     const source = this.ctx.createBufferSource();
     source.buffer = this.dieBuffer;
+    source.connect(this.ctx.destination);
+    source.start(0);
+  }
+
+  playWarp() {
+    if (this.isMuted || !this.ctx || !this.warpBuffer) return;
+
+    const source = this.ctx.createBufferSource();
+    source.buffer = this.warpBuffer;
     source.connect(this.ctx.destination);
     source.start(0);
   }

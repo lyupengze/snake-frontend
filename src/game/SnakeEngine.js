@@ -59,6 +59,8 @@ export class SnakeEngine {
   update() {
     if (this.isGameOver) return;
 
+    this.justWrapped = false;
+
     // 1. 处理输入队列
     while (this.directionQueue.length > 0) {
       const newDir = this.directionQueue.shift();
@@ -111,6 +113,7 @@ export class SnakeEngine {
 
       if (wrapped) {
         this.wrapEffect = { edge, timestamp: performance.now() };
+        this.justWrapped = true;
       }
     } else {
       // 经典/每日模式：撞墙死亡
