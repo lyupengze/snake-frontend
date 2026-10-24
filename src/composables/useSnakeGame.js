@@ -42,12 +42,15 @@ export function useSnakeGame() {
   let touchStartY = 0;
 
   const handleTouchStart = (e) => {
+    // [交互优化] 严格限制只有在游玩状态下才记录触摸点，防止在结算/开始界面滑动时触发误触
+    if (gameStatus.value !== 'playing') return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
   };
 
   const handleTouchEnd = (e) => {
-    if (!engine) return;
+    // [交互优化] 监听 window 全局触摸，让玩家在画布外（如两侧留白处）滑动也能生效
+    if (gameStatus.value !== 'playing' || !engine) return;
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
     const dx = touchEndX - touchStartX;
@@ -66,7 +69,10 @@ export function useSnakeGame() {
   };
 
   // 阻止移动端滑动时页面跟着滚动
-  const handleTouchMove = (e) => e.preventDefault();
+  const handleTouchMove = (e) => {
+    if (gameStatus.value !== 'playing') return;
+    e.preventDefault();
+  };
 
   // ==========================================
   // 游戏主循环 (requestAnimationFrame)
@@ -109,7 +115,7 @@ export function useSnakeGame() {
    * @param {string} mode 游戏模式 (classic/daily)
    * @returns {Promise<{success: boolean, message?: string}>} 启动结果
    */
-  const startGame = async (canvasElement, mode = 'classic') => {
+  const startGame = async (canvasElement, mode = 'classic', theme = 'classic') => {
     if (isStarting) return { success: false, message: '正在启动中，请勿重复点击' };
     isStarting = true;
     currentMode.value = mode;
@@ -134,7 +140,7 @@ export function useSnakeGame() {
         throw new Error('Invalid seed from server');
       }
 
-      initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed, mode));
+      initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed, mode), mode, theme);
       return { success: true };
     } catch (e) {
       console.error('[API Error] 启动游戏失败:', e);
@@ -145,18 +151,19 @@ export function useSnakeGame() {
     }
   };
 
-  const initAndRun = (canvasElement, newEngine) => {
+  const initAndRun = (canvasElement, newEngine, mode, theme) => {
     stopGame(); // 先清理上一局的残余监听器
     canvasEl = canvasElement;
     engine = newEngine;
-    renderer = new Renderer(canvasElement);
+    renderer = new Renderer(canvasElement, 20, theme, mode);
+
     score.value = 0;
     gameStatus.value = 'playing';
 
     window.addEventListener('keydown', handleKeydown);
-    canvasEl.addEventListener('touchstart', handleTouchStart, { passive: false });
-    canvasEl.addEventListener('touchend', handleTouchEnd);
-    canvasEl.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd);
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
 
     lastUpdateTime = performance.now();
     animationFrameId = requestAnimationFrame(gameLoop);
@@ -169,11 +176,9 @@ export function useSnakeGame() {
   const stopGame = (isGameOver = false) => {
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
     window.removeEventListener('keydown', handleKeydown);
-    if (canvasEl) {
-      canvasEl.removeEventListener('touchstart', handleTouchStart);
-      canvasEl.removeEventListener('touchend', handleTouchEnd);
-      canvasEl.removeEventListener('touchmove', handleTouchMove);
-    }
+    window.removeEventListener('touchstart', handleTouchStart);
+    window.removeEventListener('touchend', handleTouchEnd);
+    window.removeEventListener('touchmove', handleTouchMove);
 
     // 主动退出时才重置为 idle，如果是死亡触发的，则保留 gameover 状态供 UI 展示
     if (!isGameOver) {

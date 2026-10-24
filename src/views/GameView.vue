@@ -14,6 +14,39 @@
       <!-- 状态 1：等待开始 -->
       <div v-if="gameStatus === 'idle'" class="overlay">
         <h2>准备开始</h2>
+        <div class="theme-picker">
+          <!-- 取代原生取色器，直接放 5 个预设颜色的圆球 -->
+          <div
+            class="theme-opt classic"
+            :class="{ active: currentTheme === 'classic' }"
+            title="经典绿"
+            @click="changeTheme('classic')"
+          ></div>
+          <div
+            class="theme-opt cyber"
+            :class="{ active: currentTheme === 'cyber' }"
+            title="赛博蓝"
+            @click="changeTheme('cyber')"
+          ></div>
+          <div
+            class="theme-opt lava"
+            :class="{ active: currentTheme === 'lava' }"
+            title="熔岩红"
+            @click="changeTheme('lava')"
+          ></div>
+          <div
+            class="theme-opt sakura"
+            :class="{ active: currentTheme === 'sakura' }"
+            title="猛男粉"
+            @click="changeTheme('sakura')"
+          ></div>
+          <div
+            class="theme-opt toxic"
+            :class="{ active: currentTheme === 'toxic' }"
+            title="毒液绿"
+            @click="changeTheme('toxic')"
+          ></div>
+        </div>
         <button class="action-btn" @click="handleStart">
           {{ isDailyMode ? '开始每日挑战' : '开始游戏' }}
         </button>
@@ -53,10 +86,16 @@ const playerName = ref('');
 const isSubmitting = ref(false);
 const toastRef = ref(null); // 绑定 Toast 组件引用
 const isMuted = ref(audioManager.isMuted);
+const currentTheme = ref(localStorage.getItem('snake_theme') || 'classic');
 
 const isDailyMode = computed(() => route.query.mode === 'daily');
 const isWrapMode = computed(() => route.query.mode === 'wrap'); // [新增]
 const { score, gameStatus, startGame, stopGame, submitScore } = useSnakeGame();
+
+const changeTheme = (t) => {
+  currentTheme.value = t;
+  localStorage.setItem('snake_theme', t);
+};
 
 // 文本显示逻辑
 const modeText = computed(() => {
@@ -76,7 +115,7 @@ const toggleMute = () => {
 const handleStart = async () => {
   if (canvasRef.value) {
     const currentMode = isDailyMode.value ? 'daily' : isWrapMode.value ? 'wrap' : 'classic';
-    const result = await startGame(canvasRef.value, currentMode);
+    const result = await startGame(canvasRef.value, currentMode, currentTheme.value);
 
     // 如果启动失败，用 Toast 提示玩家
     if (!result.success) {
@@ -140,9 +179,10 @@ onUnmounted(() => stopGame());
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 20px;
+  padding: 20px 16px;
   min-height: 100vh;
   box-sizing: border-box;
+  touch-action: none;
 }
 
 .header {
@@ -258,6 +298,50 @@ onUnmounted(() => stopGame());
   color: #888;
   text-decoration: none;
   padding: 10px;
+}
+
+.theme-picker {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.theme-opt {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.theme-opt:hover {
+  transform: scale(1.15);
+}
+
+.theme-opt.active {
+  border-color: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+  transform: scale(1.15);
+}
+
+/* 为这5个圆球配上对应的颜色 */
+.theme-opt.classic {
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+}
+.theme-opt.cyber {
+  background: linear-gradient(135deg, #00e5ff, #00b0ff);
+}
+.theme-opt.lava {
+  background: linear-gradient(135deg, #ff1744, #ff5722);
+}
+.theme-opt.sakura {
+  background: linear-gradient(135deg, #f06292, #f48fb1);
+}
+.theme-opt.toxic {
+  background: linear-gradient(135deg, #76ff03, #64dd17);
 }
 
 /* ==========================================

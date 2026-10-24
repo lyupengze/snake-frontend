@@ -30,6 +30,7 @@ export class SnakeEngine {
     this.directionQueue = []; // 输入队列，最多缓存 2 个转向操作
     this.score = 0;
     this.isGameOver = false;
+    this.wrapEffect = null;
 
     this.currentTick = 0; // 当前游戏帧数
     this.actions = []; // 玩家操作记录
@@ -105,42 +106,67 @@ export class SnakeEngine {
 
     // 3. 边界处理（区分模式）
     if (this.mode === 'wrap') {
-      // 穿墙模式：越界坐标循环到另一侧
-      if (newHead.x < 0) newHead.x = this.canvasSize - this.gridSize;
-      if (newHead.x >= this.canvasSize) newHead.x = 0;
-      if (newHead.y < 0) newHead.y = this.canvasSize - this.gridSize;
-      if (newHead.y >= this.canvasSize) newHead.y = 0;
-    } else {
-      // 经典模式：撞墙死亡
-      if (
-        newHead.x < 0 ||
-        newHead.x >= this.canvasSize ||
-        newHead.y < 0 ||
-        newHead.y >= this.canvasSize
-      ) {
+      let wrapped = false;
+      let edge = null;
+
+      if (newHead.x < 0) {
+        newHead.x = this.canvasSize - this.gridSize;
+        wrapped = true;
+        edge = 'left';
+      } else if (newHead.x >= this.canvasSize) {
+        newHead.x = 0;
+        wrapped = true;
+        edge = 'right';
+      }
+
+      if (newHead.y < 0) {
+        newHead.y = this.canvasSize - this.gridSize;
+        wrapped = true;
+        edge = 'top';
+      } else if (newHead.y >= this.canvasSize) {
+        newHead.y = 0;
+        wrapped = true;
+        edge = 'bottom';
+      }
+
+      if (wrapped) {
+        // [核心修改] 记录基于物理时间的特效触发时间
+        this.wrapEffect = { edge, timestamp: performance.now() };
+      } else {
+        // 经典模式：撞墙死亡
+        if (
+          newHead.x < 0 ||
+          newHead.x >= this.canvasSize ||
+          newHead.y < 0 ||
+          newHead.y >= this.canvasSize
+        ) {
+          this.isGameOver = true;
+          return;
+        }
+      }
+
+      // [特效衰减] 每次 update 减少持续帧数
+      if (this.wrapEffect && this.wrapEffect.ticks > 0) {
+        this.wrapEffect.ticks--;
+      }
+
+      // 4. 死亡判定 (撞自己)
+      const ateFood = newHead.x === this.food.x && newHead.y === this.food.y;
+      const snakeToCheck = ateFood ? this.snake : this.snake.slice(0, -1);
+
+      if (snakeToCheck.some((segment) => segment.x === newHead.x && segment.y === newHead.y)) {
         this.isGameOver = true;
         return;
       }
+
+      // 5. 更新蛇身与分数
+      this.snake.unshift(newHead);
+      if (ateFood) {
+        this.score += 1;
+        this.spawnFood();
+      } else {
+        this.snake.pop();
+      }
     }
-
-    // 4. 死亡判定 (撞自己)
-    const ateFood = newHead.x === this.food.x && newHead.y === this.food.y;
-    const snakeToCheck = ateFood ? this.snake : this.snake.slice(0, -1);
-
-    if (snakeToCheck.some((segment) => segment.x === newHead.x && segment.y === newHead.y)) {
-      this.isGameOver = true;
-      return;
-    }
-
-    // 5. 更新蛇身与分数
-    this.snake.unshift(newHead);
-    if (ateFood) {
-      this.score += 1;
-      this.spawnFood();
-    } else {
-      this.snake.pop();
-    }
-
-    this.currentTick++;
   }
 }
