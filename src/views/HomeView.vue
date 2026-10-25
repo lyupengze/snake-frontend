@@ -1,6 +1,6 @@
 <template>
   <div class="home-view">
-    <h1>🐍 贪吃蛇大作战</h1>
+    <h1>🐍 SnakeBattle</h1>
 
     <div class="menu">
       <router-link to="/game" class="btn classic">🎮 经典模式</router-link>
@@ -38,6 +38,9 @@
         </div>
       </div>
     </div>
+  </div>
+  <div class="disclaimer" style="font-size: 12px; color: #666; margin-top: 20px">
+    本网站为个人全栈技术学习与展示项目，非商业游戏。
   </div>
 </template>
 

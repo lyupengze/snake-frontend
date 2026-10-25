@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "贪吃蛇大作战",
+        "title": "SnakeBattle",
         "width": 800,
         "height": 600,
         "resizable": true,

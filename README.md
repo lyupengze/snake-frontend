@@ -7,7 +7,7 @@
 ![Capacitor](https://img.shields.io/badge/Capacitor-6.x-53B9FF.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-这是 **贪吃蛇大作战 (Snake Battle)** 的响应式客户端。基于现代 **Vue 3 + TypeScript** 构建，不仅提供丝滑的 Web 体验，更通过 **Tauri (Rust)** 和 **Capacitor** 实现了桌面端与安卓端的全平台覆盖。
+这是 **SnakeBattle** 的响应式客户端。基于现代 **Vue 3 + TypeScript** 构建，不仅提供丝滑的 Web 体验，更通过 **Tauri (Rust)** 和 **Capacitor** 实现了桌面端与安卓端的全平台覆盖。
 
 🔗 **在线试玩地址**: [http://snakebattle.cn](http://snakebattle.cn) _(备案审核中，暂可通过 IP 访问)_
 

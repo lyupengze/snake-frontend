@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">贪吃蛇大作战</string>
-    <string name="title_activity_main">贪吃蛇大作战</string>
+    <string name="app_name">SnakeBattle</string>
+    <string name="title_activity_main">SnakeBattle</string>
     <string name="package_name">com.spamtonneo.snake</string>
     <string name="custom_url_scheme">com.spamtonneo.snake</string>
 </resources>
