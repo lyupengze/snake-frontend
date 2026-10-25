@@ -14,7 +14,8 @@ body {
   background-color: #121212;
   color: white;
   font-family: sans-serif;
-  /* 删掉 overflow: hidden，允许正常滚动 */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* [关键] 使用 min-height 而不是 height */
@@ -22,6 +23,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .app-container {
