@@ -204,6 +204,7 @@ h1 {
   padding: 20px;
   width: 100%;
   max-width: 400px;
+  box-sizing: border-box;
   text-align: left;
   color: #ccc;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
