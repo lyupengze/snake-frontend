@@ -2,6 +2,9 @@
   "appId": "com.spamtonneo.snake",
   "appName": "SnakeBattle",
   "webDir": "dist",
+  "server": {
+    "allowNavigation": ["39.106.162.26", "snakebattle.cn"]
+  },
   "plugins": {
     "CapacitorHttp": {
       "enabled": true

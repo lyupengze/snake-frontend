@@ -20,7 +20,13 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost http://39.106.162.26",
+      "devCsp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost http://39.106.162.26 ws://localhost:5173"
+    }
+  },
+  "plugins": {
+    "http": {
+      "scopeRedirects": true
     }
   },
   "bundle": {

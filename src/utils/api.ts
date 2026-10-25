@@ -39,13 +39,23 @@ export interface RequestOptions extends RequestInit {
 export async function request(url: string, options: RequestOptions = {}): Promise<any> {
   const fullUrl = `${API_BASE}${url}`;
 
-  // 1. Tauri 桌面端：使用 Rust 底层发起请求，绕过浏览器 CORS
+  // 1. Tauri 桌面端
   if (isTauri) {
     return tauriFetch(fullUrl, options);
   }
 
   // 2. Capacitor 移动端：使用原生 HTTP 插件
   if (isCapacitor) {
+    // 严格校验请求域名，防止 SSRF / 恶意请求
+    // 由于前面有 Fail-Fast 机制，这里 fullUrl 一定是带 http(s) 前缀的绝对路径
+    const parsedUrl = new URL(fullUrl);
+    const allowedHosts = ['39.106.162.26', 'snakebattle.cn', 'localhost', '127.0.0.1'];
+
+    if (!allowedHosts.includes(parsedUrl.hostname)) {
+      console.error(`[Security] 拦截了向未知域名的请求: ${parsedUrl.hostname}`);
+      throw new Error(`Blocked request to unauthorized host: ${parsedUrl.hostname}`);
+    }
+
     const response = await CapacitorHttp.request({
       url: fullUrl,
       method: options.method || 'GET',
@@ -53,6 +63,7 @@ export async function request(url: string, options: RequestOptions = {}): Promis
       // Capacitor 原生层要求传入对象而不是字符串
       data: typeof options.body === 'string' ? JSON.parse(options.body) : options.body,
     });
+
     // 封装成与 fetch API 一致的结构
     return {
       ok: response.status >= 200 && response.status < 300,
