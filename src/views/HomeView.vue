@@ -88,13 +88,23 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* ==========================================
+   页面主容器
+   ========================================== */
 .home-view {
+  /* [修复] 使用 flex: 1 撑满 #app 并允许自然滚动 */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+
   text-align: center;
-  margin-top: 60px;
-  padding-bottom: 80px;
-  min-height: 100vh;
+  padding-top: 60px;
+  padding-bottom: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
   box-sizing: border-box;
-  position: relative;
 }
 
 h1 {
@@ -147,6 +157,7 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 .divider {
@@ -191,7 +202,8 @@ h1 {
   border: 1px solid #333;
   border-radius: 8px;
   padding: 20px;
-  width: 320px;
+  width: 100%;
+  max-width: 400px;
   text-align: left;
   color: #ccc;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
@@ -216,14 +228,13 @@ h1 {
    底部声明 / 版本号
    ========================================== */
 .footer {
-  position: fixed;
-  bottom: 20px;
-  left: 0;
-  width: 100%;
   display: flex;
   justify-content: center;
-  pointer-events: none; /* 防止遮挡底部可能存在的按钮点击 */
-  z-index: 10;
+  width: 100%;
+  /* [魔法] 自动把剩余空间全占了，把自己死死顶到最底部 */
+  margin-top: auto;
+  padding-top: 60px;
+  padding-bottom: 20px;
 }
 
 .footer-text {

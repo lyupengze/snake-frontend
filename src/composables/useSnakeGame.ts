@@ -125,10 +125,14 @@ export function useSnakeGame() {
     audioManager.init(); // 解锁音频上下文
 
     try {
+      // [修复 V-07 前端兜底] 强制拦截非法 mode，默认回退到 classic
+      const safeMode = mode || 'classic';
+
       const res = await request(`/api/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: mode }),
+        // 使用 safeMode 发起请求
+        body: JSON.stringify({ mode: safeMode }),
       });
       if (!res.ok) throw new Error('Network error');
 
@@ -138,7 +142,8 @@ export function useSnakeGame() {
 
       if (typeof data.seed !== 'number') throw new Error('Invalid seed from server');
 
-      initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed, mode), mode, theme);
+      // 初始化引擎和渲染器时，也要把 safeMode 传进去，保证状态一致
+      initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed, safeMode), safeMode, theme);
       return { success: true };
     } catch (e) {
       console.error('[API Error] 启动游戏失败:', e);

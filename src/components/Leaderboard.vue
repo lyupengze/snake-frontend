@@ -50,7 +50,10 @@ const currentMode = ref(props.initialMode); // 当前选中的榜单模式
  */
 const fetchLeaderboard = async () => {
   try {
-    const res = await request(`/api/leaderboard?mode=${currentMode.value}`);
+    // [修复 V-08 前端兜底] 绝不让 undefined 或空值传给后端
+    const safeMode = currentMode.value || 'classic';
+
+    const res = await request(`/api/leaderboard?mode=${safeMode}`);
     const json = await res.json();
     // 如果后端没返回 data，则兜底为空数组
     list.value = json.data || [];
