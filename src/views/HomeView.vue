@@ -39,8 +39,14 @@
       </div>
     </div>
   </div>
-  <div class="disclaimer" style="font-size: 12px; color: #666; margin-top: 20px">
-    本网站为个人全栈技术学习与展示项目，非商业游戏。
+
+  <div class="footer">
+    <!-- Web 端：显示合规声明 -->
+    <p v-if="!env?.isNative" class="footer-text">
+      本网站为个人全栈技术学习与展示项目，非商业游戏。
+    </p>
+    <!-- 原生端（Tauri/Android）：显示极客版本号 -->
+    <p v-else class="footer-text">SnakeBattle v1.2.0 | Tech Demo</p>
   </div>
 </template>
 
@@ -82,11 +88,13 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* ... 原有的样式保持不变 ... */
 .home-view {
   text-align: center;
   margin-top: 60px;
-  padding-bottom: 40px;
+  padding-bottom: 80px;
+  min-height: 100vh;
+  box-sizing: border-box;
+  position: relative;
 }
 
 h1 {
@@ -168,6 +176,7 @@ h1 {
 .download-btn:hover {
   opacity: 0.8;
 }
+
 .android {
   background: #a4c639;
   color: #333;
@@ -201,5 +210,27 @@ h1 {
   padding-left: 20px;
   font-size: 14px;
   line-height: 1.6;
+}
+
+/* ==========================================
+   底部声明 / 版本号
+   ========================================== */
+.footer {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none; /* 防止遮挡底部可能存在的按钮点击 */
+  z-index: 10;
+}
+
+.footer-text {
+  color: #555;
+  font-size: 12px;
+  margin: 0;
+  letter-spacing: 1px;
+  user-select: none;
 }
 </style>
