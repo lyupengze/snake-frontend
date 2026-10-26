@@ -2,9 +2,14 @@
   <div class="game-view">
     <div class="header">
       <h2 class="score-board">🤖 AI 寻路演示 - 得分: {{ score }}</h2>
-      <button class="mute-btn" @click="toggleMute">
-        {{ isMuted ? '🔇' : '🔊' }}
-      </button>
+      <div class="speed-controls">
+        <button class="speed-btn" :class="{ active: speedMultiplier !== 1 }" @click="cycleSpeed">
+          {{ speedMultiplier }}x
+        </button>
+        <button class="mute-btn" @click="toggleMute">
+          {{ isMuted ? '🔇' : '🔊' }}
+        </button>
+      </div>
     </div>
 
     <div class="canvas-wrapper">
@@ -37,12 +42,22 @@ const canvasRef = ref(null);
 const score = ref(0);
 const gameStatus = ref('idle');
 const isMuted = ref(audioManager.isMuted);
+const speedMultiplier = ref(1);
+
+const SPEED_LEVELS = [1, 2, 4, 8];
+const BASE_TICK_INTERVAL = 150;
 
 let engine = null;
 let renderer = null;
 let animationFrameId = null;
 let lastUpdateTime = 0;
-const TICK_INTERVAL = 150;
+
+const currentTickInterval = () => BASE_TICK_INTERVAL / speedMultiplier.value;
+
+const cycleSpeed = () => {
+  const idx = SPEED_LEVELS.indexOf(speedMultiplier.value);
+  speedMultiplier.value = SPEED_LEVELS[(idx + 1) % SPEED_LEVELS.length];
+};
 
 const toggleMute = () => {
   isMuted.value = audioManager.toggleMute();
@@ -51,7 +66,8 @@ const toggleMute = () => {
 const gameLoop = (timestamp) => {
   if (gameStatus.value !== 'playing') return;
 
-  if (timestamp - lastUpdateTime >= TICK_INTERVAL) {
+  const interval = currentTickInterval();
+  if (timestamp - lastUpdateTime >= interval) {
     const nextDir = AutoPilot.getNextDirection(engine);
     engine.changeDirection(nextDir);
 
@@ -71,7 +87,7 @@ const gameLoop = (timestamp) => {
       return;
     }
 
-    lastUpdateTime = timestamp - ((timestamp - lastUpdateTime) % TICK_INTERVAL);
+    lastUpdateTime = timestamp - ((timestamp - lastUpdateTime) % interval);
   }
   renderer.draw(engine);
   animationFrameId = requestAnimationFrame(gameLoop);
@@ -88,6 +104,7 @@ const startAiGame = () => {
     renderer = new Renderer(canvasRef.value, 20, 'cyber', 'wrap');
 
     score.value = 0;
+    speedMultiplier.value = 1;
     gameStatus.value = 'playing';
     lastUpdateTime = performance.now();
     animationFrameId = requestAnimationFrame(gameLoop);
@@ -126,6 +143,30 @@ onUnmounted(() => {
   transition: transform 0.2s;
 }
 .mute-btn:hover { transform: scale(1.1); opacity: 1; }
+.speed-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.speed-btn {
+  background: transparent;
+  border: 1px solid #00e5ff;
+  color: #00e5ff;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 40px;
+}
+.speed-btn:hover {
+  background: rgba(0, 229, 255, 0.1);
+}
+.speed-btn.active {
+  background: #00e5ff;
+  color: #000;
+}
 .canvas-wrapper {
   position: relative;
   width: 100%;
