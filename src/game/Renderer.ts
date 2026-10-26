@@ -9,10 +9,7 @@ interface ThemePalette {
 
 export type ThemeName = 'classic' | 'cyber' | 'lava' | 'sakura' | 'toxic';
 
-/**
- * Canvas 渲染引擎
- * 负责 Retina 高清屏适配、皮肤绘制以及穿墙空间裂隙特效。
- */
+// Canvas 渲染引擎：Retina 高清屏适配、主题皮肤绘制、穿墙边缘光晕特效
 export class Renderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
@@ -42,7 +39,7 @@ export class Renderer {
     this.padding = 1;
     this.size = this.gridSize - this.padding * 2;
 
-    // [Retina 适配] 放大实际渲染分辨率，缩放绘图上下文
+    // 按设备像素比放大画布，再缩放上下文，实现 Retina 屏清晰渲染
     const dpr = window.devicePixelRatio || 1;
     canvas.width = this.logicalWidth * dpr;
     canvas.height = this.logicalHeight * dpr;
@@ -65,11 +62,10 @@ export class Renderer {
     const palette = this.themes[this.theme as ThemeName] || this.themes.classic;
     const now = performance.now();
 
-    // 1. 清屏
     this.ctx.fillStyle = '#121212';
     this.ctx.fillRect(0, 0, this.logicalWidth, this.logicalHeight);
 
-    // 2. 穿墙特效 (基于物理时间的平滑渐隐)
+    // 穿墙模式边缘光晕：400ms 内基于物理时间平滑渐隐
     if (this.mode === 'wrap' && state.wrapEffect) {
       const elapsed = now - state.wrapEffect.timestamp;
       const duration = 400;
@@ -88,7 +84,6 @@ export class Renderer {
           rectW = 0,
           rectH = 0;
 
-        // [坐标修正] 动态计算渐变方向和填充位置
         if (edge === 'left') {
           grad = this.ctx.createLinearGradient(0, 0, thickness, 0);
           grad.addColorStop(0, palette.glow);
@@ -133,7 +128,6 @@ export class Renderer {
       }
     }
 
-    // 3. 绘制食物
     if (state.food) {
       this.ctx.save();
       this.ctx.fillStyle = palette.food;
@@ -143,7 +137,6 @@ export class Renderer {
       this.ctx.restore();
     }
 
-    // 4. 绘制蛇
     state.snake.forEach((segment, index) => {
       if (index === 0) {
         this.ctx.fillStyle = palette.head;

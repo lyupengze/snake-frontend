@@ -7,27 +7,23 @@
       <button class="btn daily" @click="goDaily">📅 每日挑战</button>
       <button class="btn wrap" @click="goWrap">🌀 穿墙模式</button>
       <router-link to="/leaderboard" class="btn leaderboard">🏆 查看排行榜</router-link>
+      <router-link to="/ai-demo" class="btn ai">🤖 AI 寻路演示</router-link>
     </div>
 
-    <!-- 更新日志与下载面板 -->
     <div class="web-extras">
-      <!-- 下载链接：仅在 Web 端显示 -->
+      <!-- 下载入口仅 Web 端可见 -->
       <div v-if="!env?.isNative" class="download-section">
         <div class="divider">—— 客户端下载 ——</div>
         <div class="download-links">
-          <!-- 安卓版 -->
           <a href="/downloads/snake-battle-latest.apk" target="_blank" class="download-btn android">
             🤖 下载安卓版 (APK)
           </a>
-
-          <!-- 桌面版 -->
           <a href="/downloads/snake-battle-latest.msi" target="_blank" class="download-btn windows">
             💻 下载桌面版 (Windows)
           </a>
         </div>
       </div>
 
-      <!-- 动态更新日志：Web 和原生端都显示 -->
       <div class="changelog" v-if="changelog">
         <div class="divider">—— 最新动态 ——</div>
         <div class="changelog-box">
@@ -41,11 +37,9 @@
   </div>
 
   <div class="footer">
-    <!-- Web 端：显示合规声明 -->
     <p v-if="!env?.isNative" class="footer-text">
       本网站为个人全栈技术学习与展示项目，非商业游戏。
     </p>
-    <!-- 原生端（Tauri/Android）：显示极客版本号 -->
     <p v-else class="footer-text">SnakeBattle v1.2.0 | Tech Demo</p>
   </div>
 </template>
@@ -53,10 +47,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { request, env } from '../utils/api'; // 引入 request 和 env
+import { request, env } from '../utils/api';
 
 const router = useRouter();
-const changelog = ref(null); // 存储动态获取的更新日志
+const changelog = ref(null);
 
 const goDaily = () => {
   router.push({ path: '/game', query: { mode: 'daily' } });
@@ -66,15 +60,14 @@ const goWrap = () => {
   router.push({ path: '/game', query: { mode: 'wrap' } });
 };
 
-// 页面挂载时，动态拉取服务器上的 changelog.json
 onMounted(async () => {
   try {
     let res;
     if (env.isNative) {
-      // 原生端没有域名上下文，必须走 API_BASE 拼出绝对路径
+      // 原生端无域名上下文，通过 API_BASE 拼接绝对路径
       res = await request('/changelog.json');
     } else {
-      // Web 端（本地和线上）直接走同源相对路径，由 Vite/Nginx 处理静态文件
+      // Web 端走同源相对路径
       res = await fetch('/changelog.json');
     }
 
@@ -88,22 +81,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* ==========================================
-   页面主容器
-   ========================================== */
 .home-view {
-  /* [修复] 使用 flex: 1 撑满 #app 并允许自然滚动 */
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-
   text-align: center;
-  padding-top: 60px;
-  padding-bottom: 20px;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding: 60px 20px 20px;
   box-sizing: border-box;
 }
 
@@ -127,7 +112,7 @@ h1 {
   border-radius: 8px;
   text-decoration: none;
   color: white;
-  border: none;
+ border: none;
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
 }
@@ -136,22 +121,12 @@ h1 {
   transform: scale(1.05);
 }
 
-.classic {
-  background: #4caf50;
-}
-.leaderboard {
-  background: #2196f3;
-}
-.daily {
-  background: #ff9800;
-}
-.wrap {
-  background: #9c27b0;
-}
+.classic { background: #4caf50; }
+.leaderboard { background: #2196f3; }
+.daily { background: #ff9800; }
+.wrap { background: #9c27b0; }
+.ai { background: #00bcd4; }
 
-/* ==========================================
-   扩展面板样式 (下载 + 更新日志)
-   ========================================== */
 .web-extras {
   margin-top: 50px;
   display: flex;
@@ -163,11 +138,9 @@ h1 {
 .divider {
   color: #666;
   font-size: 14px;
-  margin-bottom: 20px;
-  margin-top: 10px;
+  margin: 10px 0 20px;
 }
 
-/* 下载区域 */
 .download-links {
   display: flex;
   gap: 15px;
@@ -184,19 +157,10 @@ h1 {
   transition: opacity 0.2s;
 }
 
-.download-btn:hover {
-  opacity: 0.8;
-}
+.download-btn:hover { opacity: 0.8; }
+.android { background: #a4c639; color: #333; }
+.windows { background: #0078d7; }
 
-.android {
-  background: #a4c639;
-  color: #333;
-}
-.windows {
-  background: #0078d7;
-}
-
-/* 更新日志 */
 .changelog-box {
   background: #1e1e1e;
   border: 1px solid #333;
@@ -225,17 +189,12 @@ h1 {
   line-height: 1.6;
 }
 
-/* ==========================================
-   底部声明 / 版本号
-   ========================================== */
 .footer {
   display: flex;
   justify-content: center;
   width: 100%;
-  /* [魔法] 自动把剩余空间全占了，把自己死死顶到最底部 */
   margin-top: auto;
-  padding-top: 60px;
-  padding-bottom: 20px;
+  padding: 60px 0 20px;
 }
 
 .footer-text {

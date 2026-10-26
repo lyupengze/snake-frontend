@@ -1,14 +1,8 @@
-/**
- * 游戏音效管理器 (基于 Web Audio API)
- *
- * [深度优化]
- * 1. 预生成 AudioBuffer，消除播放时的计算卡顿。
- * 2. 采用“心跳保活”机制防止移动端音频硬件休眠。
- *
- * TODO: 移动端（Android/HarmonyOS WebView）存在 3~4 秒的音频延迟。
- * 原因是手机系统的音频硬件休眠唤醒机制与 AudioContext 虚拟时钟存在漂移冲突。
- * 后续优化方向：可尝试改用 HTML5 <audio> 标签播放动态生成的 WAV 文件流。
- */
+// 游戏音效管理器：基于 Web Audio API 合成 8-bit 风格音效，无外部音频文件依赖。
+// 预生成 AudioBuffer 消除播放延迟；心跳保活防止移动端音频硬件休眠。
+//
+// 已知问题：移动端 WebView 存在约 3~4 秒音频延迟，
+// 源于系统音频硬件休眠唤醒与 AudioContext 虚拟时钟的漂移冲突。
 class AudioManager {
   private ctx: AudioContext | null = null;
   public isMuted: boolean;
@@ -21,7 +15,7 @@ class AudioManager {
 
   constructor() {
     this.isMuted = localStorage.getItem('snake_muted') === 'true';
-    // 监听页面可见性，切后台回来强制恢复音频通道
+    // 页面从后台恢复时重新激活音频上下文
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && this.ctx) {
         this.ctx.resume();
@@ -34,7 +28,6 @@ class AudioManager {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       this.ctx = new AudioContextClass();
 
-      // 初始化时预生成音效
       this.eatBuffer = this.generateBuffer(400, 1200, 0.12, 'square', 0.15);
       this.dieBuffer = this.generateBuffer(300, 50, 0.4, 'sawtooth', 0.1);
       this.warpBuffer = this.generateWarpBuffer();
@@ -42,7 +35,7 @@ class AudioManager {
 
     if (this.ctx.state === 'suspended') this.ctx.resume();
 
-    // [移动端延迟修复] 启动心跳保活 (20000Hz 超声波，人耳听不到)
+    // 20000Hz 超声波心跳保活，保持音频通道活跃防止移动端休眠
     if (!this.heartbeatNode && this.ctx) {
       this.heartbeatNode = this.ctx.createOscillator();
       this.heartbeatGain = this.ctx.createGain();
@@ -55,9 +48,6 @@ class AudioManager {
     }
   }
 
-  /**
-   * 生成基础波形 Buffer
-   */
   private generateBuffer(
     freqStart: number,
     freqEnd: number,
@@ -86,6 +76,7 @@ class AudioManager {
           2 * Math.abs(2 * (phase / (2 * Math.PI) - Math.floor(phase / (2 * Math.PI) + 0.5))) - 1;
       else sample = Math.sin(phase);
 
+      // 尾部 20% 做淡出包络，避免截断爆音
       let envelope = 1;
       if (progress > 0.8) envelope = Math.max(0, 1 - (progress - 0.8) / 0.2);
       data[i] = sample * vol * envelope;
@@ -93,9 +84,7 @@ class AudioManager {
     return buffer;
   }
 
-  /**
-   * 生成穿墙专属“吸溜”音效（下坠式气哨 + 瞬态起音）
-   */
+  // 穿墙专属"吸溜"音效：下坠式气哨 + 瞬态起音
   private generateWarpBuffer(): AudioBuffer {
     const sampleRate = this.ctx!.sampleRate;
     const duration = 0.2;

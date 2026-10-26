@@ -14,10 +14,7 @@ export interface SubmitScoreResult {
   status: number;
 }
 
-/**
- * 贪吃蛇游戏 Vue Composable
- * 负责将底层引擎、渲染器、音频和网络请求与 Vue 的响应式状态连接起来。
- */
+// 连接游戏引擎、渲染器、音频和网络层的 Vue 组合式函数
 export function useSnakeGame() {
   const gameStatus = ref<'idle' | 'playing' | 'gameover'>('idle');
   const score = ref<number>(0);
@@ -29,15 +26,11 @@ export function useSnakeGame() {
   let lastUpdateTime = 0;
   const TICK_INTERVAL = 150;
 
-  // 状态锁与上下文变量
   let currentGameId: string | null = null;
   let isStarting = false;
   let isSubmitting = false;
   let canvasEl: HTMLCanvasElement | null = null;
 
-  // ==========================================
-  // 键盘与触摸事件监听
-  // ==========================================
   const handleKeydown = (e: KeyboardEvent) => {
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
     if (!engine) return;
@@ -63,6 +56,7 @@ export function useSnakeGame() {
     const dx = touchEndX - touchStartX;
     const dy = touchEndY - touchStartY;
 
+    // 滑动距离不足 30px 视为误触，忽略
     if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
 
     if (Math.abs(dx) > Math.abs(dy)) {
@@ -79,9 +73,6 @@ export function useSnakeGame() {
     e.preventDefault();
   };
 
-  // ==========================================
-  // 游戏主循环
-  // ==========================================
   const gameLoop = (timestamp: number) => {
     if (gameStatus.value !== 'playing' || !engine || !renderer) return;
 
@@ -102,7 +93,7 @@ export function useSnakeGame() {
         return;
       }
 
-      // 帧率补偿机制：防止由于 requestAnimationFrame 触发间隔不精准导致的游戏变慢
+      // 帧率补偿：修正 requestAnimationFrame 间隔不精准导致的累计漂移
       lastUpdateTime = timestamp - ((timestamp - lastUpdateTime) % TICK_INTERVAL);
     }
 
@@ -110,9 +101,6 @@ export function useSnakeGame() {
     animationFrameId = requestAnimationFrame(gameLoop);
   };
 
-  // ==========================================
-  // 启动与销毁
-  // ==========================================
   const startGame = async (
     canvasElement: HTMLCanvasElement,
     mode: GameMode = 'classic',
@@ -122,16 +110,14 @@ export function useSnakeGame() {
     isStarting = true;
     currentMode.value = mode;
 
-    audioManager.init(); // 解锁音频上下文
+    audioManager.init();
 
     try {
-      // [修复 V-07 前端兜底] 强制拦截非法 mode，默认回退到 classic
       const safeMode = mode || 'classic';
 
       const res = await request(`/api/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // 使用 safeMode 发起请求
         body: JSON.stringify({ mode: safeMode }),
       });
       if (!res.ok) throw new Error('Network error');
@@ -142,7 +128,6 @@ export function useSnakeGame() {
 
       if (typeof data.seed !== 'number') throw new Error('Invalid seed from server');
 
-      // 初始化引擎和渲染器时，也要把 safeMode 传进去，保证状态一致
       initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed, safeMode), safeMode, theme);
       return { success: true };
     } catch (e) {
@@ -189,9 +174,6 @@ export function useSnakeGame() {
 
   onUnmounted(() => stopGame());
 
-  // ==========================================
-  // 提交分数
-  // ==========================================
   const submitScore = async (playerName: string): Promise<SubmitScoreResult> => {
     if (!currentGameId || isSubmitting) {
       return { success: false, status: 400 };

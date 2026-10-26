@@ -8,26 +8,21 @@ repository = "https://github.com/lyupengze/snake-frontend"
 edition = "2024"
 rust-version = "1.90"
 
-# 定义库的类型：静态库、动态库和 Rust 库
-# Tauri 2 推荐将核心逻辑放在 lib 中，以便跨平台编译和移动端复用
+# 核心逻辑放在 lib 中，便于跨平台编译和移动端复用
 [lib]
 name = "app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
-# 构建依赖：Tauri 的构建工具
 [build-dependencies]
 tauri-build = { version = "2.7.4", features = [] }
 
-# 运行依赖
 [dependencies]
-# 序列化与反序列化（用于前后端 IPC 通信传递 JSON）
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 
-# 日志系统
 log = "0.4"
 tauri-plugin-log = "2"
 
-# Tauri 核心库与网络插件（用于替代 WebView 的 fetch 发起跨域请求）
+# tauri-plugin-http 替代 WebView 原生 fetch，绕过 CORS 限制
 tauri = { version = "2.12.5", features = [] }
 tauri-plugin-http = "2"

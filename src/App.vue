@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <!-- 全局路由出口：根据当前 URL 渲染对应的页面组件 -->
     <router-view />
   </div>
 </template>
@@ -18,7 +17,7 @@ body {
   overflow-y: auto;
 }
 
-/* [关键] 使用 min-height 而不是 height */
+/* min-height 允许内容超出视口时自然滚动，而非截断 */
 #app {
   min-height: 100vh;
   display: flex;
@@ -32,6 +31,4 @@ body {
   display: flex;
   flex-direction: column;
 }
-
-/* 下面原有的 .navbar 等样式保持不变... */
 </style>
