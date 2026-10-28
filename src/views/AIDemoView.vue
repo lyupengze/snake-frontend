@@ -121,9 +121,10 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 20px;
+  padding: 20px 16px;
   min-height: 100vh;
   box-sizing: border-box;
+  touch-action: none;
 }
 .header {
   display: flex;
@@ -131,6 +132,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 15px;
   margin-bottom: 15px;
+  position: relative;
 }
 .score-board { color: #00e5ff; margin: 0; }
 .mute-btn {
@@ -176,21 +178,26 @@ onUnmounted(() => {
 }
 .game-canvas {
   border: 2px solid #555;
-  background-color: #121212;
+  background-color: #000;
   width: 100%;
   max-width: 400px;
   aspect-ratio: 1/1;
   display: block;
+  touch-action: none;
 }
 .overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.85);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 15px;
+  border-radius: 4px;
 }
 .action-btn {
   padding: 12px 28px;
@@ -201,7 +208,20 @@ onUnmounted(() => {
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
+  transition: opacity 0.2s;
 }
-.final-score { font-size: 20px; color: #ff9800; }
-.back-link { margin-top: 25px; color: #888; text-decoration: none; }
+.final-score { font-size: 20px; color: #ff9800; margin: 0; }
+.back-link {
+  display: inline-block;
+  margin-top: 25px;
+  color: #888;
+  text-decoration: none;
+  padding: 10px;
+}
+
+@media (max-width: 480px) {
+  .score-board { font-size: 18px; margin-bottom: 10px; }
+  .game-view { padding-top: 10px; }
+  .action-btn { padding: 14px 32px; }
+}
 </style>
