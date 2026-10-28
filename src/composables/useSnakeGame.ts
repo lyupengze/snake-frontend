@@ -30,6 +30,8 @@ export function useSnakeGame() {
   let isStarting = false;
   let isSubmitting = false;
   let canvasEl: HTMLCanvasElement | null = null;
+  let retryCount = 0;
+  const MAX_RETRIES = 3;
 
   const handleKeydown = (e: KeyboardEvent) => {
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
@@ -192,11 +194,33 @@ export function useSnakeGame() {
         }),
       });
 
-      const ok = response.ok;
-      currentGameId = null;
-      return { success: ok, status: response.status };
+      if (response.ok) {
+        currentGameId = null;
+        retryCount = 0;
+        return { success: true, status: response.status };
+      }
+
+      // 403（作弊/会话过期）和 413（游戏过长）为不可恢复的永久失败
+      if (response.status === 403 || response.status === 413) {
+        currentGameId = null;
+        retryCount = 0;
+        return { success: false, status: response.status };
+      }
+
+      // 400/429/500 等保留 gameId，玩家修正后仍可重试
+      retryCount++;
+      if (retryCount >= MAX_RETRIES) {
+        currentGameId = null;
+        retryCount = 0;
+      }
+      return { success: false, status: response.status };
     } catch (error) {
       console.error('[API Error] 提交分数失败:', error);
+      retryCount++;
+      if (retryCount >= MAX_RETRIES) {
+        currentGameId = null;
+        retryCount = 0;
+      }
       return { success: false, status: 0 };
     } finally {
       isSubmitting = false;
