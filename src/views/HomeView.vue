@@ -15,9 +15,9 @@
       <div v-if="!env?.isNative" class="download-section">
         <div class="divider">—— 客户端下载 ——</div>
         <div class="download-links">
-          <a href="/downloads/snake-battle-latest.apk" target="_blank" class="download-btn android">
-            🤖 下载安卓版 (APK)
-          </a>
+          <button class="download-btn android disabled" disabled>
+            🤖 安卓版 (即将上线)
+          </button>
           <a href="/downloads/snake-battle-latest.msi" target="_blank" class="download-btn windows">
             💻 下载桌面版 (Windows)
           </a>
@@ -158,6 +158,11 @@ h1 {
 }
 
 .download-btn:hover { opacity: 0.8; }
+.download-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.download-btn.disabled:hover { opacity: 0.5; }
 .android { background: #a4c639; color: #333; }
 .windows { background: #0078d7; }
 
