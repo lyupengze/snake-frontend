@@ -30,8 +30,18 @@
         <h2>💀 游戏结束</h2>
         <p class="final-score">最终得分: {{ score }}</p>
         <input v-model="playerName" placeholder="输入你的名字" maxlength="20" />
-        <button class="action-btn" @click="saveScore" :disabled="isSubmitting">
-          {{ isSubmitting ? '提交中...' : '提交排行榜' }}
+        <button
+          class="action-btn"
+          @click="saveScore"
+          :disabled="isSubmitting || isRetryExhausted"
+        >
+          {{
+            isRetryExhausted
+              ? '本局无法上榜'
+              : isSubmitting
+                ? '提交中...'
+                : '提交排行榜'
+          }}
         </button>
       </div>
     </div>
@@ -53,6 +63,7 @@ const route = useRoute();
 const canvasRef = ref(null);
 const playerName = ref('');
 const isSubmitting = ref(false);
+const isRetryExhausted = ref(false);
 const toastRef = ref(null);
 const isMuted = ref(audioManager.isMuted);
 const currentTheme = ref(localStorage.getItem('snake_theme') || 'classic');
@@ -77,6 +88,7 @@ const toggleMute = () => {
 };
 
 const handleStart = async () => {
+  isRetryExhausted.value = false;
   if (canvasRef.value) {
     const currentMode = isDailyMode.value ? 'daily' : isWrapMode.value ? 'wrap' : 'classic';
     const result = await startGame(canvasRef.value, currentMode, currentTheme.value);
@@ -106,6 +118,8 @@ const saveScore = async () => {
     }, 800);
   } else {
     if (result.retryExhausted) {
+      isSubmitting.value = false;
+      isRetryExhausted.value = true;
       toastRef.value?.show('😞 多次提交失败，本局成绩无法上榜');
       return;
     }
