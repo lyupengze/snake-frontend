@@ -1,0 +1,49 @@
+# Workflow 名称，显示在 GitHub Actions 页面
+name: CI Frontend
+
+# 触发条件
+on:
+  # 推送到 main 分支时触发（合并 PR 后）
+  push:
+    branches: [main]
+    # 只有这些文件变动才触发，改 README 不浪费 CI 分钟数
+    paths:
+      - 'src/**'                # 源码
+      - 'package.json'          # 依赖声明
+      - 'package-lock.json'     # 依赖锁文件
+      - 'tsconfig.json'         # TypeScript 配置
+      - 'vite.config.ts'        # 构建配置
+      - '.github/workflows/ci-frontend.yml'  # 改 CI 配置本身也要验证
+  # PR 目标为 main 时触发（合并前的质量门禁）
+  pull_request:
+    branches: [main]
+
+# 任务定义
+jobs:
+  typecheck-and-build:
+    # 用最新 Ubuntu 虚拟机跑
+    runs-on: ubuntu-latest
+
+    steps:
+      # 第一步：拉取代码到 Runner
+      - uses: actions/checkout@v4
+
+      # 第二步：安装 Node.js 22，并自动缓存 npm 依赖
+      # cache: npm 会根据 package-lock.json 的 hash 缓存 node_modules
+      # 锁文件没变 → 跳过下载，省几十秒
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # 第三步：安装依赖
+      # npm ci 严格按 package-lock.json 安装，不修改锁文件，比 npm install 更快更确定
+      - run: npm ci
+
+      # 第四步：TypeScript 类型检查
+      # --noEmit 只检查不输出，目的是捕获类型错误
+      - run: npx vue-tsc --noEmit
+
+      # 第五步：生产构建
+      # 确认 Vite 能正常打包，捕获构建时错误
+      - run: npm run build
