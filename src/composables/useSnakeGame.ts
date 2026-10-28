@@ -12,6 +12,7 @@ export interface StartGameResult {
 export interface SubmitScoreResult {
   success: boolean;
   status: number;
+  retryExhausted?: boolean;
 }
 
 // 连接游戏引擎、渲染器、音频和网络层的 Vue 组合式函数
@@ -153,6 +154,7 @@ export function useSnakeGame() {
     renderer = new Renderer(canvasElement, 20, theme, mode);
 
     score.value = 0;
+    retryCount = 0;
     gameStatus.value = 'playing';
 
     window.addEventListener('keydown', handleKeydown);
@@ -212,6 +214,7 @@ export function useSnakeGame() {
       if (retryCount >= MAX_RETRIES) {
         currentGameId = null;
         retryCount = 0;
+        return { success: false, status: response.status, retryExhausted: true };
       }
       return { success: false, status: response.status };
     } catch (error) {
@@ -220,6 +223,7 @@ export function useSnakeGame() {
       if (retryCount >= MAX_RETRIES) {
         currentGameId = null;
         retryCount = 0;
+        return { success: false, status: 0, retryExhausted: true };
       }
       return { success: false, status: 0 };
     } finally {

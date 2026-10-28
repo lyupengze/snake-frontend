@@ -105,6 +105,10 @@ const saveScore = async () => {
       });
     }, 800);
   } else {
+    if (result.retryExhausted) {
+      toastRef.value?.show('😞 多次提交失败，本局成绩无法上榜');
+      return;
+    }
     isSubmitting.value = false;
     if (result.status === 403) {
       toastRef.value?.show('❌ 校验未通过（疑似作弊或会话过期）');
