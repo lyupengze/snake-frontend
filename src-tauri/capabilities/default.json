@@ -13,7 +13,10 @@
       "identifier": "http:allow-fetch",
       "allow": [
         {
-          "url": "http://39.106.162.26/*"
+          "url": "https://snakebattle.cn/*"
+        },
+        {
+          "url": "https://www.snakebattle.cn/*"
         }
       ]
     }
