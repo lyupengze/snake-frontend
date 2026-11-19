@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { SITE } from '../config/site';
+import { isNative } from '../utils/runtime';
 import previewImage from '../../images/game-preview.png';
 
 const route = useRoute();
@@ -128,13 +129,49 @@ const techBadges = ['Vue 3', 'TypeScript', 'Vite', 'Tauri 2', 'Capacitor', 'Canv
         </nav>
 
         <div class="header-actions">
-          <a class="header-github" :href="SITE.githubUrl" target="_blank" rel="noopener noreferrer">
+          <router-link v-if="isNative" to="/menu" class="header-back" aria-label="返回游戏主页">
+            <span aria-hidden="true">←</span>
+            <span class="back-text">返回主页</span>
+          </router-link>
+
+          <a
+            class="header-github"
+            :href="SITE.githubUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="前端源码仓库"
+          >
             <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="currentColor">
               <path
                 d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.1c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.27-1.68-1.27-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.25 3.33.95.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.8 1.18 1.83 1.18 3.09 0 4.43-2.69 5.41-5.25 5.69.41.36.78 1.06.78 2.14v3.17c0 .3.21.66.8.55A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"
               />
             </svg>
-            <span>源码</span>
+            <span>前端</span>
+          </a>
+
+          <a
+            class="header-github"
+            :href="SITE.backendGithubUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="后端源码仓库"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="17"
+              height="17"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <ellipse cx="12" cy="5" rx="7" ry="3" />
+              <path d="M5 5v6c0 1.66 3.13 3 7 3s7-1.34 7-3V5" />
+              <path d="M5 11v6c0 1.66 3.13 3 7 3s7-1.34 7-3v-6" />
+            </svg>
+            <span>后端</span>
           </a>
         </div>
       </div>
@@ -170,7 +207,7 @@ const techBadges = ['Vue 3', 'TypeScript', 'Vite', 'Tauri 2', 'Capacitor', 'Canv
           <template v-if="SITE.gameplayEnabled">
             <router-link class="btn btn-primary" to="/menu">开始游戏</router-link>
             <a class="btn btn-ghost" :href="SITE.githubUrl" target="_blank" rel="noopener noreferrer">
-              GitHub 源码
+              前端源码
             </a>
           </template>
           <template v-else>
@@ -180,11 +217,20 @@ const techBadges = ['Vue 3', 'TypeScript', 'Vite', 'Tauri 2', 'Capacitor', 'Canv
                   d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.1c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.27-1.68-1.27-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.25 3.33.95.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.8 1.18 1.83 1.18 3.09 0 4.43-2.69 5.41-5.25 5.69.41.36.78 1.06.78 2.14v3.17c0 .3.21.66.8.55A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"
                 />
               </svg>
-              在 GitHub 查看源码
+              查看前端源码
             </a>
             <a class="btn btn-ghost" href="#play">了解项目</a>
           </template>
         </div>
+
+        <p class="hero-repo-note">
+          <span class="repo-dot" aria-hidden="true"></span>
+          后端服务同样开源：
+          <a :href="SITE.backendGithubUrl" target="_blank" rel="noopener noreferrer">
+            snake-backend
+            <span aria-hidden="true">↗</span>
+          </a>
+        </p>
 
         <ul class="hero-stats">
           <li><strong>3</strong><span>端同源</span></li>
@@ -474,15 +520,28 @@ const techBadges = ['Vue 3', 'TypeScript', 'Vite', 'Tauri 2', 'Capacitor', 'Canv
             项目仍在对战体验与跨端适配上持续迭代。欢迎 Star、提 Issue，或者直接读代码。
             本网站为个人全栈技术学习与展示项目，非商业游戏。
           </p>
-          <a class="repo-link" :href="SITE.githubUrl" target="_blank" rel="noopener noreferrer">
-            github.com/lyupengze/snake-frontend
-            <span aria-hidden="true">↗</span>
-          </a>
+          <div class="repo-list">
+            <a class="repo-link" :href="SITE.githubUrl" target="_blank" rel="noopener noreferrer">
+              <span class="repo-tag">前端</span>
+              github.com/lyupengze/snake-frontend
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a class="repo-link" :href="SITE.backendGithubUrl" target="_blank" rel="noopener noreferrer">
+              <span class="repo-tag">后端</span>
+              github.com/lyupengze/snake-backend
+              <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         </div>
 
-        <a class="btn btn-primary cta-btn" :href="SITE.githubUrl" target="_blank" rel="noopener noreferrer">
-          前往 GitHub 仓库
-        </a>
+        <div class="cta-actions">
+          <a class="btn btn-primary cta-btn" :href="SITE.githubUrl" target="_blank" rel="noopener noreferrer">
+            前端仓库
+          </a>
+          <a class="btn btn-ghost cta-btn" :href="SITE.backendGithubUrl" target="_blank" rel="noopener noreferrer">
+            后端仓库
+          </a>
+        </div>
       </div>
     </section>
 
@@ -586,6 +645,28 @@ const techBadges = ['Vue 3', 'TypeScript', 'Vite', 'Tauri 2', 'Capacitor', 'Canv
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.header-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(126, 231, 135, 0.28);
+  border-radius: 9px;
+  background: rgba(76, 175, 80, 0.1);
+  color: #9be59f;
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.header-back:hover {
+  border-color: rgba(126, 231, 135, 0.5);
+  background: rgba(76, 175, 80, 0.16);
+  color: var(--green-bright);
 }
 
 .header-github {
@@ -698,6 +779,38 @@ h1 span {
   flex-wrap: wrap;
   gap: 14px;
   margin-top: 30px;
+}
+
+.hero-repo-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.hero-repo-note a {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #9be59f;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.hero-repo-note a:hover {
+  color: #c6f2c9;
+  text-decoration: underline;
+}
+
+.repo-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(126, 231, 135, 0.7);
 }
 
 .btn {
@@ -1296,14 +1409,24 @@ h1 span {
   line-height: 1.85;
 }
 
+.repo-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 20px;
+}
+
 .repo-link {
   display: inline-flex;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 8px;
   align-items: center;
-  margin-top: 20px;
   color: #9be59f;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12.5px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -1311,6 +1434,33 @@ h1 span {
 .repo-link:hover {
   color: #c6f2c9;
   text-decoration: underline;
+}
+
+.repo-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  padding: 1px 6px;
+  border: 1px solid rgba(126, 231, 135, 0.24);
+  border-radius: 5px;
+  background: rgba(126, 231, 135, 0.08);
+  color: #9be59f;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.cta-actions {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 12px;
+  width: 180px;
+}
+
+.cta-actions .btn {
+  width: 100%;
 }
 
 .cta-btn {
@@ -1408,6 +1558,15 @@ h1 span {
     display: none;
   }
 
+  .header-actions {
+    margin-left: auto;
+  }
+
+  .cta-actions {
+    width: 100%;
+    max-width: 320px;
+  }
+
   .mode-grid,
   .feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1433,8 +1592,12 @@ h1 span {
 
 @media (max-width: 620px) {
   .header-inner {
-    gap: 16px;
+    gap: 10px;
     padding: 0 18px;
+  }
+
+  .header-actions {
+    gap: 8px;
   }
 
   .header-github span {
@@ -1445,6 +1608,21 @@ h1 span {
     width: 36px;
     padding: 0;
     justify-content: center;
+  }
+
+  .header-back {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .header-back .back-text {
+    display: none;
+  }
+
+  .cta-actions {
+    width: 100%;
+    max-width: none;
   }
 
   .hero,

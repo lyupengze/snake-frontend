@@ -20,7 +20,9 @@ const year = new Date().getFullYear();
         </div>
 
         <div class="site-footer-links">
-          <a :href="SITE.githubUrl" target="_blank" rel="noopener noreferrer">GitHub 源码</a>
+          <a :href="SITE.githubUrl" target="_blank" rel="noopener noreferrer">前端源码</a>
+          <span class="site-footer-sep" aria-hidden="true">/</span>
+          <a :href="SITE.backendGithubUrl" target="_blank" rel="noopener noreferrer">后端源码</a>
           <span class="site-footer-sep" aria-hidden="true">/</span>
           <a :href="SITE.icpUrl" class="site-footer-icp" target="_blank" rel="noopener noreferrer">
             {{ SITE.icpNumber }}
