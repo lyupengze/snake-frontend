@@ -35,7 +35,9 @@
       </div>
     </div>
 
-    <router-link v-if="!env.isNative" to="/" class="menu-back">⬅️ 返回展示主页</router-link>
+    <router-link :to="env.isNative ? '/landing' : '/'" class="menu-back">
+      {{ env.isNative ? '🖥️ 查看展示主页' : '⬅️ 返回展示主页' }}
+    </router-link>
   </div>
 </template>
 
