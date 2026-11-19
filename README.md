@@ -60,23 +60,28 @@ npm run dev
 |---|---|
 | `.env.example` | 配置模板 |
 | `.env.development` | 开发环境（留空走代理） |
-| `.env.production` | 生产环境（原生端必须填写后端绝对路径） |
+| `.env.production` | Web 生产环境（展示模式） |
+| `.env.native` | 原生端构建（完整玩法 + 线上 API `https://snakebattle.cn`） |
 
 原生端（Tauri / Capacitor）缺少 `VITE_API_BASE_URL` 配置时，应用会直接阻断启动。
 
 ## 多端构建
 
 ```bash
-# Web 静态产物
+# Web 静态产物（展示模式，首页为项目介绍页）
 npm run build
 
-# Tauri 桌面端 (MSI)
+# Tauri 桌面端 (MSI)：beforeBuildCommand 会自动执行 build:native
 npm run tauri:build
 
-# Android 端
-npm run cap:sync
+# Android 端：先构建原生模式产物，再同步并打包
+npm run build:native
+npx cap sync android
 cd android && ./gradlew assembleDebug
 ```
+
+`build:native` 使用 Vite 的 `native` 模式加载 `.env.native`：开启全部玩法、直连
+`https://snakebattle.cn`。因此安装包启动后直接进入原来的游戏菜单，而不是展示主页。
 
 ## 跨端网络适配
 
@@ -119,4 +124,8 @@ VITE_GAMEPLAY_ENABLED=true
 ```
 
 即可恢复全部可玩页面，业务代码无需改动。
+
+原生 App（Tauri / Capacitor）通过 `.env.native` 固定开启玩法，并且只在原生环境把
+`/` 重定向到 `/menu`，所以 App 打开后仍是原来的游戏菜单；Web 端 `/` 始终是展示主页，
+两者共用同一套代码。
 
