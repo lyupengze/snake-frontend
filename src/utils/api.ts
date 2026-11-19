@@ -1,20 +1,13 @@
 import { CapacitorHttp } from '@capacitor/core';
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
+import { isTauri, isCapacitor, isNative } from './runtime';
 
 const ENV_API_BASE = import.meta.env.VITE_API_BASE_URL;
-
-// 运行时探测当前宿主环境
-const isTauri = typeof window !== 'undefined' && !!(window as any).__TAURI_INTERNALS__;
-const isCapacitor =
-  typeof window !== 'undefined' &&
-  (window as any).Capacitor &&
-  (window as any).Capacitor.getPlatform() !== 'web';
-const isNative = isTauri || isCapacitor;
 
 // Fail-Fast：原生端缺少后端地址配置时直接阻断启动，防止带病上线
 if (isNative && !ENV_API_BASE) {
   throw new Error(
-    '[Fatal] 原生端(App/Tauri)必须配置 VITE_API_BASE_URL。请在 .env.production 中设置后端地址。'
+    '[Fatal] 原生端(App/Tauri)必须配置 VITE_API_BASE_URL。请在 .env.native 中设置后端地址。'
   );
 }
 
@@ -36,7 +29,7 @@ export async function request(url: string, options: RequestOptions = {}): Promis
   if (isCapacitor) {
     // 域名白名单校验，防止 SSRF
     const parsedUrl = new URL(fullUrl);
-    const allowedHosts = ['39.106.162.26', 'snakebattle.cn', 'localhost', '127.0.0.1'];
+    const allowedHosts = ['snakebattle.cn', 'www.snakebattle.cn', 'localhost', '127.0.0.1'];
 
     if (!allowedHosts.includes(parsedUrl.hostname)) {
       console.error(`[Security] 拦截了向未知域名的请求: ${parsedUrl.hostname}`);

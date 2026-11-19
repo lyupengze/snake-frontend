@@ -3,7 +3,7 @@
   "appName": "SnakeBattle",
   "webDir": "dist",
   "server": {
-    "allowNavigation": ["39.106.162.26", "snakebattle.cn"]
+    "allowNavigation": ["snakebattle.cn", "www.snakebattle.cn"]
   },
   "plugins": {
     "CapacitorHttp": {
