@@ -9,7 +9,16 @@ import OpenSourceSection from '../components/landing/OpenSourceSection.vue';
 import { useLockedNotice } from '../composables/useLockedNotice';
 
 const { showLocked, lockedLabel, dismissLocked } = useLockedNotice();
-const techBadges = ['Vue 3', 'TypeScript', 'Vite', 'Tauri 2', 'Capacitor', 'Canvas 2D', 'Web Audio', 'MIT License'];
+const techBadges = [
+  'Vue 3',
+  'TypeScript',
+  'Vite',
+  'Tauri 2',
+  'Capacitor',
+  'Canvas 2D',
+  'Web Audio',
+  'MIT License',
+];
 </script>
 
 <template>

@@ -41,14 +41,14 @@ Android 端共用同一套 Vue 3 + TypeScript 代码与 Canvas 渲染管线。
 
 ## 技术栈
 
-| 层面 | 技术 |
-|---|---|
-| 框架 | Vue 3 + TypeScript + Vite |
-| 路由 | Vue Router（HTML5 History） |
-| 桌面端 | Tauri 2（Rust） |
-| 移动端 | Capacitor（Android） |
-| 渲染 | Canvas 2D |
-| 音频 | Web Audio API（合成音效） |
+| 层面     | 技术                                  |
+| -------- | ------------------------------------- |
+| 框架     | Vue 3 + TypeScript + Vite             |
+| 路由     | Vue Router（HTML5 History）           |
+| 桌面端   | Tauri 2（Rust）                       |
+| 移动端   | Capacitor（Android）                  |
+| 渲染     | Canvas 2D                             |
+| 音频     | Web Audio API（合成音效）             |
 | 质量保障 | vue-tsc 严格类型检查 + GitHub Actions |
 
 ## 项目结构
@@ -96,19 +96,19 @@ npm run dev
 
 ## 环境变量
 
-| 文件 | 用途 |
-|---|---|
-| `.env.example` | 配置模板，可复制后修改 |
-| `.env.development` | 开发环境，留空走 Vite 代理 |
-| `.env.production` | Web 生产环境（展示模式，玩法关闭） |
-| `.env.native` | 原生端构建，完整玩法 + 线上 API `https://snakebattle.cn` |
-| `.env.native.local` | 本地私有覆盖（已被 Git 忽略） |
+| 文件                | 用途                                                     |
+| ------------------- | -------------------------------------------------------- |
+| `.env.example`      | 配置模板，可复制后修改                                   |
+| `.env.development`  | 开发环境，留空走 Vite 代理                               |
+| `.env.production`   | Web 生产环境（展示模式，玩法关闭）                       |
+| `.env.native`       | 原生端构建，完整玩法 + 线上 API `https://snakebattle.cn` |
+| `.env.native.local` | 本地私有覆盖（已被 Git 忽略）                            |
 
 核心变量：
 
-| 变量 | 说明 |
-|---|---|
-| `VITE_API_BASE_URL` | 后端地址；原生端必填，缺失会在启动时直接阻断并给出提示 |
+| 变量                    | 说明                                                    |
+| ----------------------- | ------------------------------------------------------- |
+| `VITE_API_BASE_URL`     | 后端地址；原生端必填，缺失会在启动时直接阻断并给出提示  |
 | `VITE_GAMEPLAY_ENABLED` | 是否开放可玩路由；Web 默认 `false`，原生构建固定 `true` |
 
 ## 构建与发布
@@ -176,13 +176,13 @@ VITE_GAMEPLAY_ENABLED=true
 
 分数提交按状态码分类处理：
 
-| 状态码 | 行为 | 原因 |
-|---|---|---|
-| 200 | 清空 gameId，跳转排行榜 | 成功 |
-| 403 | 清空 gameId，本局结束 | 作弊或会话过期，不可恢复 |
-| 413 | 清空 gameId，本局结束 | 游戏过长，无法修复 |
-| 400 | 保留 gameId，可重试 | 输入校验失败 |
-| 429 / 500 / 网络错误 | 保留 gameId，可重试 | 临时故障 |
+| 状态码               | 行为                    | 原因                     |
+| -------------------- | ----------------------- | ------------------------ |
+| 200                  | 清空 gameId，跳转排行榜 | 成功                     |
+| 403                  | 清空 gameId，本局结束   | 作弊或会话过期，不可恢复 |
+| 413                  | 清空 gameId，本局结束   | 游戏过长，无法修复       |
+| 400                  | 保留 gameId，可重试     | 输入校验失败             |
+| 429 / 500 / 网络错误 | 保留 gameId，可重试     | 临时故障                 |
 
 重试上限 3 次，超出后按钮显示「本局无法上榜」并禁用；开始新游戏时状态自动重置。
 
@@ -203,10 +203,10 @@ VITE_GAMEPLAY_ENABLED=true
 
 ## 相关仓库
 
-| 仓库 | 内容 |
-|---|---|
+| 仓库                                                          | 内容                                      |
+| ------------------------------------------------------------- | ----------------------------------------- |
 | [snake-frontend](https://github.com/lyupengze/snake-frontend) | Vue 3 / TypeScript 跨平台客户端、展示主页 |
-| [snake-backend](https://github.com/lyupengze/snake-backend) | 排行榜、每日种子、分数重放校验等后端服务 |
+| [snake-backend](https://github.com/lyupengze/snake-backend)   | 排行榜、每日种子、分数重放校验等后端服务  |
 
 ## License
 

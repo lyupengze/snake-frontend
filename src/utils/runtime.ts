@@ -16,8 +16,6 @@ export const isTauri =
   !!(window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__;
 
 export const isCapacitor =
-  !!capacitor &&
-  typeof capacitor.getPlatform === 'function' &&
-  capacitor.getPlatform() !== 'web';
+  !!capacitor && typeof capacitor.getPlatform === 'function' && capacitor.getPlatform() !== 'web';
 
 export const isNative = isTauri || isCapacitor;

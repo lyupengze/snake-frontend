@@ -14,11 +14,36 @@
       <div v-if="gameStatus === 'idle'" class="overlay">
         <h2>准备开始</h2>
         <div class="theme-picker">
-          <div class="theme-opt classic" :class="{ active: currentTheme === 'classic' }" title="经典绿" @click="changeTheme('classic')"></div>
-          <div class="theme-opt cyber" :class="{ active: currentTheme === 'cyber' }" title="赛博蓝" @click="changeTheme('cyber')"></div>
-          <div class="theme-opt lava" :class="{ active: currentTheme === 'lava' }" title="熔岩红" @click="changeTheme('lava')"></div>
-          <div class="theme-opt sakura" :class="{ active: currentTheme === 'sakura' }" title="猛男粉" @click="changeTheme('sakura')"></div>
-          <div class="theme-opt toxic" :class="{ active: currentTheme === 'toxic' }" title="毒液绿" @click="changeTheme('toxic')"></div>
+          <div
+            class="theme-opt classic"
+            :class="{ active: currentTheme === 'classic' }"
+            title="经典绿"
+            @click="changeTheme('classic')"
+          ></div>
+          <div
+            class="theme-opt cyber"
+            :class="{ active: currentTheme === 'cyber' }"
+            title="赛博蓝"
+            @click="changeTheme('cyber')"
+          ></div>
+          <div
+            class="theme-opt lava"
+            :class="{ active: currentTheme === 'lava' }"
+            title="熔岩红"
+            @click="changeTheme('lava')"
+          ></div>
+          <div
+            class="theme-opt sakura"
+            :class="{ active: currentTheme === 'sakura' }"
+            title="猛男粉"
+            @click="changeTheme('sakura')"
+          ></div>
+          <div
+            class="theme-opt toxic"
+            :class="{ active: currentTheme === 'toxic' }"
+            title="毒液绿"
+            @click="changeTheme('toxic')"
+          ></div>
         </div>
         <button class="action-btn" @click="handleStart">
           {{ isDailyMode ? '开始每日挑战' : '开始游戏' }}
@@ -30,18 +55,8 @@
         <h2>💀 游戏结束</h2>
         <p class="final-score">最终得分: {{ score }}</p>
         <input v-model="playerName" placeholder="输入你的名字" maxlength="20" />
-        <button
-          class="action-btn"
-          @click="saveScore"
-          :disabled="isSubmitting || isRetryExhausted"
-        >
-          {{
-            isRetryExhausted
-              ? '本局无法上榜'
-              : isSubmitting
-                ? '提交中...'
-                : '提交排行榜'
-          }}
+        <button class="action-btn" @click="saveScore" :disabled="isSubmitting || isRetryExhausted">
+          {{ isRetryExhausted ? '本局无法上榜' : isSubmitting ? '提交中...' : '提交排行榜' }}
         </button>
       </div>
     </div>
@@ -269,10 +284,14 @@ onUnmounted(() => stopGame());
   border-radius: 50%;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
-.theme-opt:hover { transform: scale(1.15); }
+.theme-opt:hover {
+  transform: scale(1.15);
+}
 
 .theme-opt.active {
   border-color: #ffffff;
@@ -280,15 +299,32 @@ onUnmounted(() => stopGame());
   transform: scale(1.15);
 }
 
-.theme-opt.classic { background: linear-gradient(135deg, #2e7d32, #4caf50); }
-.theme-opt.cyber { background: linear-gradient(135deg, #00e5ff, #00b0ff); }
-.theme-opt.lava { background: linear-gradient(135deg, #ff1744, #ff5722); }
-.theme-opt.sakura { background: linear-gradient(135deg, #f06292, #f48fb1); }
-.theme-opt.toxic { background: linear-gradient(135deg, #76ff03, #64dd17); }
+.theme-opt.classic {
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+}
+.theme-opt.cyber {
+  background: linear-gradient(135deg, #00e5ff, #00b0ff);
+}
+.theme-opt.lava {
+  background: linear-gradient(135deg, #ff1744, #ff5722);
+}
+.theme-opt.sakura {
+  background: linear-gradient(135deg, #f06292, #f48fb1);
+}
+.theme-opt.toxic {
+  background: linear-gradient(135deg, #76ff03, #64dd17);
+}
 
 @media (max-width: 480px) {
-  .score-board { font-size: 18px; margin-bottom: 10px; }
-  .game-view { padding-top: 10px; }
-  .action-btn { padding: 14px 32px; }
+  .score-board {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  .game-view {
+    padding-top: 10px;
+  }
+  .action-btn {
+    padding: 14px 32px;
+  }
 }
 </style>

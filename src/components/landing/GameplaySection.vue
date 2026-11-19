@@ -33,19 +33,57 @@ const modes = [
   </SectionHeading>
 
   <div class="mode-grid">
-    <article v-for="mode in modes" :key="mode.name" class="mode-card" :style="{ '--accent': mode.accent }">
+    <article
+      v-for="mode in modes"
+      :key="mode.name"
+      class="mode-card"
+      :style="{ '--accent': mode.accent }"
+    >
       <div class="mode-top">
         <span class="mode-icon">
-          <svg v-if="mode.icon === 'classic'" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg
+            v-if="mode.icon === 'classic'"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <rect x="3" y="3" width="18" height="18" rx="4" />
             <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
           </svg>
-          <svg v-else-if="mode.icon === 'daily'" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg
+            v-else-if="mode.icon === 'daily'"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <rect x="3" y="5" width="18" height="16" rx="3" />
             <path d="M8 3v4M16 3v4M3 10h18" />
             <path d="M8 14h2M14 14h2M8 18h2M14 18h2" />
           </svg>
-          <svg v-else viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg
+            v-else
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <rect x="3" y="3" width="18" height="18" rx="4" stroke-dasharray="4 3" />
             <path d="M8 12h8M13 9l3 3-3 3" />
           </svg>
@@ -55,7 +93,17 @@ const modes = [
       <h3>{{ mode.name }}</h3>
       <p>{{ mode.desc }}</p>
       <span class="mode-lock">
-        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          width="12"
+          height="12"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
           <rect x="4" y="10" width="16" height="10" rx="2" />
           <path d="M8 10V7a4 4 0 0 1 8 0v3" />
         </svg>

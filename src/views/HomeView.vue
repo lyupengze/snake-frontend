@@ -15,9 +15,7 @@
       <div v-if="!env?.isNative" class="download-section">
         <div class="divider">—— 客户端下载 ——</div>
         <div class="download-links">
-          <button class="download-btn android disabled" disabled>
-            🤖 安卓版 (即将上线)
-          </button>
+          <button class="download-btn android disabled" disabled>🤖 安卓版 (即将上线)</button>
           <a href="/downloads/snake-battle-latest.msi" target="_blank" class="download-btn windows">
             💻 下载桌面版 (Windows)
           </a>
@@ -109,7 +107,7 @@ h1 {
   border-radius: 8px;
   text-decoration: none;
   color: white;
- border: none;
+  border: none;
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
 }
@@ -118,11 +116,21 @@ h1 {
   transform: scale(1.05);
 }
 
-.classic { background: #4caf50; }
-.leaderboard { background: #2196f3; }
-.daily { background: #ff9800; }
-.wrap { background: #9c27b0; }
-.ai { background: #00bcd4; }
+.classic {
+  background: #4caf50;
+}
+.leaderboard {
+  background: #2196f3;
+}
+.daily {
+  background: #ff9800;
+}
+.wrap {
+  background: #9c27b0;
+}
+.ai {
+  background: #00bcd4;
+}
 
 .web-extras {
   margin-top: 50px;
@@ -154,14 +162,23 @@ h1 {
   transition: opacity 0.2s;
 }
 
-.download-btn:hover { opacity: 0.8; }
+.download-btn:hover {
+  opacity: 0.8;
+}
 .download-btn.disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-.download-btn.disabled:hover { opacity: 0.5; }
-.android { background: #a4c639; color: #333; }
-.windows { background: #0078d7; }
+.download-btn.disabled:hover {
+  opacity: 0.5;
+}
+.android {
+  background: #a4c639;
+  color: #333;
+}
+.windows {
+  background: #0078d7;
+}
 
 .changelog-box {
   background: #1e1e1e;
@@ -199,5 +216,7 @@ h1 {
   transition: color 0.2s;
 }
 
-.menu-back:hover { color: #4caf50; }
+.menu-back:hover {
+  color: #4caf50;
+}
 </style>

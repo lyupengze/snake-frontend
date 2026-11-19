@@ -109,7 +109,10 @@ onMounted(fetchLeaderboard);
   font-size: 16px;
 }
 
-.rank-num { color: #888; width: 30px; }
+.rank-num {
+  color: #888;
+  width: 30px;
+}
 
 .rank-name {
   flex: 1;
@@ -119,7 +122,10 @@ onMounted(fetchLeaderboard);
   white-space: nowrap;
 }
 
-.rank-score { color: #4caf50; font-weight: bold; }
+.rank-score {
+  color: #4caf50;
+  font-weight: bold;
+}
 
 .empty {
   text-align: center;

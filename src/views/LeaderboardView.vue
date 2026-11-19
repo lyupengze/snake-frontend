@@ -51,5 +51,7 @@ h1 {
   transition: color 0.2s;
 }
 
-.back-link:hover { color: #4caf50; }
+.back-link:hover {
+  color: #4caf50;
+}
 </style>

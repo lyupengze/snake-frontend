@@ -10,7 +10,12 @@
       </div>
 
       <div class="board-body">
-        <svg class="board-svg" viewBox="0 0 440 440" role="img" aria-label="SnakeBattle 游戏画面示意图：一条绿色贪吃蛇正朝红色食物移动">
+        <svg
+          class="board-svg"
+          viewBox="0 0 440 440"
+          role="img"
+          aria-label="SnakeBattle 游戏画面示意图：一条绿色贪吃蛇正朝红色食物移动"
+        >
           <defs>
             <linearGradient id="boardBg" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="#101a12" />
@@ -53,7 +58,17 @@
             <rect x="189" y="189" width="30" height="30" rx="7" fill="#48aa4c" />
             <rect x="189" y="157" width="30" height="30" rx="7" fill="#4caf50" />
             <rect x="221" y="157" width="30" height="30" rx="7" fill="#5bb95e" />
-            <rect x="253" y="157" width="30" height="30" rx="7" fill="url(#snakeGrad)" stroke="#8ee894" stroke-opacity="0.35" stroke-width="1.5" />
+            <rect
+              x="253"
+              y="157"
+              width="30"
+              height="30"
+              rx="7"
+              fill="url(#snakeGrad)"
+              stroke="#8ee894"
+              stroke-opacity="0.35"
+              stroke-width="1.5"
+            />
           </g>
 
           <!-- 眼睛：看向右侧的食物 -->
@@ -64,7 +79,13 @@
 
           <!-- 舌头 -->
           <path d="M286 178h14" stroke="#e53935" stroke-width="3" stroke-linecap="round" />
-          <path d="m300 178 7-5m-7 5 7 5" stroke="#e53935" stroke-width="3" stroke-linecap="round" fill="none" />
+          <path
+            d="m300 178 7-5m-7 5 7 5"
+            stroke="#e53935"
+            stroke-width="3"
+            stroke-linecap="round"
+            fill="none"
+          />
 
           <!-- 食物 -->
           <g filter="url(#appleGlow)">

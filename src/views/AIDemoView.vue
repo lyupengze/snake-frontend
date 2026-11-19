@@ -134,7 +134,10 @@ onUnmounted(() => {
   margin-bottom: 15px;
   position: relative;
 }
-.score-board { color: #00e5ff; margin: 0; }
+.score-board {
+  color: #00e5ff;
+  margin: 0;
+}
 .mute-btn {
   background: transparent;
   border: none;
@@ -144,7 +147,10 @@ onUnmounted(() => {
   opacity: 0.8;
   transition: transform 0.2s;
 }
-.mute-btn:hover { transform: scale(1.1); opacity: 1; }
+.mute-btn:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
 .speed-controls {
   display: flex;
   align-items: center;
@@ -210,7 +216,11 @@ onUnmounted(() => {
   font-weight: bold;
   transition: opacity 0.2s;
 }
-.final-score { font-size: 20px; color: #ff9800; margin: 0; }
+.final-score {
+  font-size: 20px;
+  color: #ff9800;
+  margin: 0;
+}
 .back-link {
   display: inline-block;
   margin-top: 25px;
@@ -220,8 +230,15 @@ onUnmounted(() => {
 }
 
 @media (max-width: 480px) {
-  .score-board { font-size: 18px; margin-bottom: 10px; }
-  .game-view { padding-top: 10px; }
-  .action-btn { padding: 14px 32px; }
+  .score-board {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  .game-view {
+    padding-top: 10px;
+  }
+  .action-btn {
+    padding: 14px 32px;
+  }
 }
 </style>

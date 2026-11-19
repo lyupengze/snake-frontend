@@ -17,7 +17,12 @@ import { SITE } from '../../config/site';
           github.com/lyupengze/snake-frontend
           <span aria-hidden="true">↗</span>
         </a>
-        <a class="repo-link" :href="SITE.backendGithubUrl" target="_blank" rel="noopener noreferrer">
+        <a
+          class="repo-link"
+          :href="SITE.backendGithubUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <span class="repo-tag">后端</span>
           github.com/lyupengze/snake-backend
           <span aria-hidden="true">↗</span>
@@ -26,10 +31,20 @@ import { SITE } from '../../config/site';
     </div>
 
     <div class="cta-actions">
-      <a class="btn btn-primary cta-btn" :href="SITE.githubUrl" target="_blank" rel="noopener noreferrer">
+      <a
+        class="btn btn-primary cta-btn"
+        :href="SITE.githubUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         前端仓库
       </a>
-      <a class="btn btn-ghost cta-btn" :href="SITE.backendGithubUrl" target="_blank" rel="noopener noreferrer">
+      <a
+        class="btn btn-ghost cta-btn"
+        :href="SITE.backendGithubUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         后端仓库
       </a>
     </div>

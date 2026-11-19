@@ -16,7 +16,14 @@ const navItems = [
     <div class="header-inner">
       <a class="brand" href="/" aria-label="SnakeBattle 首页">
         <svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true">
-          <rect width="512" height="512" rx="96" fill="#121212" stroke="#4caf50" stroke-width="24" />
+          <rect
+            width="512"
+            height="512"
+            rx="96"
+            fill="#121212"
+            stroke="#4caf50"
+            stroke-width="24"
+          />
           <rect x="330" y="110" width="60" height="60" rx="10" fill="#e53935" />
           <rect x="110" y="330" width="60" height="60" rx="10" fill="#388e3c" />
           <rect x="150" y="270" width="60" height="60" rx="10" fill="#388e3c" />
