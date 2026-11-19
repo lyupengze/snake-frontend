@@ -5,13 +5,15 @@ node_modules
 dist
 dist-ssr
 *.local
+*.tsbuildinfo
 
 # ==========================================
 # 环境变量文件
 # ==========================================
-# [说明] 忽略本地环境和生产环境配置。
-# .env.development 会提交到仓库供统一开发使用，
-# 而 .env.production 根据具体部署环境生成（例如服务器构建时直接取 Nginx 同源，而不写死 IP）。
+# [说明] .env.development、.env.native、.env.example 会提交到仓库：
+# 前两者分别供 Web 开发和原生构建直接使用，示例文件用于说明字段。
+# .env.production 与 *.local 按具体部署环境本地生成，不写死 IP。
+# 原生端如需覆盖 .env.native 中的值，请使用 .env.native.local（已被忽略）。
 .env.production
 .env.local
 .env.*.local
@@ -34,6 +36,8 @@ lerna-debug.log*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
+desktop.ini
 *.suo
 *.ntvs*
 *.njsproj
@@ -54,3 +58,13 @@ android/build/
 android/app/build/
 android/local.properties
 android/.idea/
+android/.kotlin/
+
+# ==========================================
+# 签名与密钥（禁止提交）
+# ==========================================
+*.jks
+*.keystore
+*.p12
+*.pfx
+keystore.properties
