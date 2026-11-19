@@ -100,7 +100,7 @@ npm run dev
 |---|---|
 | `.env.example` | 配置模板，可复制后修改 |
 | `.env.development` | 开发环境，留空走 Vite 代理 |
-| `.env.production` | Web 生产环境，仅展示模式，不连后端 |
+| `.env.production` | Web 生产环境（展示模式，玩法关闭） |
 | `.env.native` | 原生端构建，完整玩法 + 线上 API `https://snakebattle.cn` |
 | `.env.native.local` | 本地私有覆盖（已被 Git 忽略） |
 

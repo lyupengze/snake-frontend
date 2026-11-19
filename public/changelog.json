@@ -5,7 +5,7 @@
     "🖥️ 新增项目展示主页：玩法、技术亮点、界面预览与开源入口集中呈现；未取得版号期间 Web 端仅作展示。",
     "🔒 展示模式开关：默认关闭 /menu、/game、/leaderboard、/ai-demo，拦截后回到首页并提示；玩法代码完整保留。",
     "📄 全站页脚统一展示 ICP 备案号「京ICP备2026074972号」，并链接工信部备案系统。",
-    "🌐 后端地址迁移至 https://snakebattle.cn / https://www.snakebattle.cn，同步更新 Tauri CSP、Capacitor 白名单与 Android 网络安全配置。",
+    "🌐 后端地址迁移至 https://snakebattle.cn / https://www.snakebattle.cn，同步更新 Tauri CSP 与 Capacitor 域名白名单。",
     "📱 原生端保留完整玩法：Tauri / Capacitor 启动直接进入游戏菜单，并可从菜单查看展示主页；展示页返回入口仅原生端可见。",
     "🧩 构建拆分：新增 build:native，构建时校验 VITE_API_BASE_URL 与 VITE_GAMEPLAY_ENABLED，避免产出只有展示页的安装包。",
     "🏗️ 底层架构升级：全量代码从 JavaScript 迁移至 TypeScript，引入严格类型检查，运行更稳定。",
