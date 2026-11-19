@@ -46,7 +46,7 @@
       </div>
     </div>
 
-    <router-link to="/" class="back-link">⬅️ 返回主页</router-link>
+    <router-link to="/menu" class="back-link">⬅️ 返回菜单</router-link>
     <Toast ref="toastRef" />
   </div>
 </template>

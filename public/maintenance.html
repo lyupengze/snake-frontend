@@ -3,49 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnakeBattle - 正在维护</title>
+    <title>SnakeBattle - 技术展示</title>
+    <meta name="description" content="因游戏版号尚未下发，SnakeBattle 网页端当前仅作技术展示，暂不开放试玩。">
     <style>
+        * { box-sizing: border-box; }
         body {
             background-color: #121212;
             color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 24px;
             text-align: center;
         }
         .container {
-            max-width: 500px;
+            max-width: 520px;
             padding: 20px;
         }
         h1 {
             color: #4caf50;
-            font-size: 36px;
-            margin-bottom: 20px;
+            font-size: 34px;
+            margin: 0 0 20px;
         }
         p {
-            color: #888;
-            line-height: 1.6;
+            color: #8b998f;
+            line-height: 1.8;
+            font-size: 14.5px;
         }
         .badge {
             display: inline-block;
-            background: #333;
+            background: rgba(255, 183, 77, 0.1);
+            border: 1px solid rgba(255, 183, 77, 0.28);
             padding: 5px 12px;
             border-radius: 20px;
             font-size: 12px;
-            color: #ff9800;
-            margin-top: 20px;
+            color: #ffb74d;
+            margin-top: 18px;
         }
+        .links {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+        .links a {
+            padding: 9px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9px;
+            color: #d7e1da;
+            font-size: 13px;
+            text-decoration: none;
+        }
+        .links a.primary {
+            background: #4caf50;
+            border-color: #4caf50;
+            color: #08130a;
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 64px;
+            color: #5f6d63;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+        .footer a { color: #7f8f84; text-decoration: none; }
+        .footer a:hover { color: #7ee787; text-decoration: underline; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚧 网站正在备案维护中</h1>
-        <p>SnakeBattle 目前正在进行国家工信部 ICP 备案审核。<br>为了确保合规，Web 网页端已暂时关闭。</p>
-        <p>如果你已经安装了桌面端或安卓客户端，它们仍可正常连接服务器并游玩。</p>
-        <div class="badge">Please wait for ICP Filing</div>
+        <h1>🐍 SnakeBattle</h1>
+        <p>因游戏版号尚未下发，网页端当前仅作技术展示，暂不开放试玩。</p>
+        <p>已完成的玩法、排行榜与 AI 演示均保留在代码仓库中，版号下发后可恢复访问。</p>
+        <div class="badge">展示模式 · Display Only</div>
+        <div class="links">
+            <a class="primary" href="/">返回展示主页</a>
+            <a href="https://github.com/lyupengze/snake-frontend" target="_blank" rel="noopener noreferrer">GitHub 源码</a>
+        </div>
     </div>
+
+    <footer class="footer">
+        <div>个人全栈技术学习与展示项目 · 非商业游戏</div>
+        <div>© 2026 SnakeBattle · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">京ICP备2026074972号</a></div>
+    </footer>
 </body>
 </html>

@@ -34,13 +34,8 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="footer">
-    <p v-if="!env?.isNative" class="footer-text">
-      本网站为个人全栈技术学习与展示项目，非商业游戏。
-    </p>
-    <p v-else class="footer-text">SnakeBattle v1.2.0 | Tech Demo</p>
+    <router-link to="/" class="menu-back">⬅️ 返回展示主页</router-link>
   </div>
 </template>
 
@@ -194,19 +189,13 @@ h1 {
   line-height: 1.6;
 }
 
-.footer {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin-top: auto;
-  padding: 60px 0 20px;
+.menu-back {
+  margin-top: 36px;
+  color: #7d8b81;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.2s;
 }
 
-.footer-text {
-  color: #555;
-  font-size: 12px;
-  margin: 0;
-  letter-spacing: 1px;
-  user-select: none;
-}
+.menu-back:hover { color: #4caf50; }
 </style>

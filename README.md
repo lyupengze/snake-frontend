@@ -103,3 +103,20 @@ cd android && ./gradlew assembleDebug
 | 429/500/网络错误 | 保留 gameId，可重试 | 临时故障 |
 
 重试上限 3 次，超出后按钮显示"本局无法上榜"并禁用。开始新游戏时状态自动重置。
+
+## 展示模式（版号审批期间）
+
+因尚未取得游戏版号，Web 端默认运行在「展示模式」：
+
+- `/` 为项目介绍页，集中展示玩法、技术栈与界面预览，并提供 GitHub 仓库入口；
+- `/menu`、`/game`、`/leaderboard`、`/ai-demo` 的代码与路由全部保留，但对外统一重定向回首页；
+- 所有页面底部统一展示 ICP 备案号：`京ICP备2026074972号`。
+
+版号下发后，把 `src/config/site.ts` 中的 `GAMEPLAY_ENABLED` 改为 `true`，或在构建时设置环境变量：
+
+```bash
+VITE_GAMEPLAY_ENABLED=true
+```
+
+即可恢复全部可玩页面，业务代码无需改动。
+
