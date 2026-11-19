@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <router-link to="/" class="menu-back">⬅️ 返回展示主页</router-link>
+    <router-link v-if="!env.isNative" to="/" class="menu-back">⬅️ 返回展示主页</router-link>
   </div>
 </template>
 
