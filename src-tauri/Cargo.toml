@@ -1,6 +1,6 @@
 [package]
 name = "SnakeBattle"
-version = "1.2.0"
+version = "1.2.1"
 description = "Snake Game Desktop Client (Tauri 2)"
 authors = ["SpamtonNEO"]
 license = "MIT"

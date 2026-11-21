@@ -11,7 +11,7 @@ export const GAMEPLAY_ENABLED = import.meta.env.VITE_GAMEPLAY_ENABLED === 'true'
 
 export const SITE = {
   name: 'SnakeBattle',
-  version: 'v1.2.0',
+  version: 'v1.2.1',
   /** 前端开源仓库地址 */
   githubUrl: 'https://github.com/lyupengze/snake-frontend',
   /** 后端开源仓库地址 */
