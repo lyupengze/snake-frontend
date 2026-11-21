@@ -21,6 +21,8 @@ export class Renderer {
   private size: number;
   private logicalWidth: number = 400;
   private logicalHeight: number = 400;
+  private zoom: number;
+  private appliedDpr: number = 0;
 
   private themes: Record<ThemeName, ThemePalette>;
 
@@ -28,22 +30,19 @@ export class Renderer {
     canvas: HTMLCanvasElement,
     gridSize = 20,
     theme = 'classic',
-    mode: string = 'classic'
+    mode: string = 'classic',
+    zoom = 1
   ) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
     this.gridSize = gridSize;
     this.theme = theme;
     this.mode = mode;
+    this.zoom = zoom;
 
     this.padding = 1;
     this.size = this.gridSize - this.padding * 2;
-
-    // 按设备像素比放大画布，再缩放上下文，实现 Retina 屏清晰渲染
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = this.logicalWidth * dpr;
-    canvas.height = this.logicalHeight * dpr;
-    this.ctx.scale(dpr, dpr);
+    this.applyScale();
 
     this.themes = {
       classic: { head: '#2e7d32', body: '#4caf50', glow: 'rgba(76, 175, 80, 1)', food: '#e53935' },
@@ -52,6 +51,43 @@ export class Renderer {
       sakura: { head: '#f06292', body: '#f48fb1', glow: 'rgba(240, 98, 146, 1)', food: '#4caf50' },
       toxic: { head: '#76ff03', body: '#64dd17', glow: 'rgba(118, 255, 3, 1)', food: '#d500f9' },
     };
+  }
+
+  /**
+   * 调整画布显示倍率。
+   *
+   * 同步放大位图分辨率，而不是只拉伸 CSS 尺寸，避免桌面端放大后画面模糊。
+   * 返回是否真正发生了变化（倍率或设备像素比变化）。
+   */
+  public setZoom(zoom: number): boolean {
+    if (!Number.isFinite(zoom) || zoom <= 0) return false;
+
+    const dpr = window.devicePixelRatio || 1;
+    if (Math.abs(zoom - this.zoom) < 0.001 && dpr === this.appliedDpr) return false;
+
+    this.zoom = zoom;
+    this.applyScale();
+    return true;
+  }
+
+  private applyScale(): void {
+    const dpr = window.devicePixelRatio || 1;
+    const pixelWidth = Math.max(1, Math.round(this.logicalWidth * this.zoom * dpr));
+    const pixelHeight = Math.max(1, Math.round(this.logicalHeight * this.zoom * dpr));
+
+    this.canvas.width = pixelWidth;
+    this.canvas.height = pixelHeight;
+    this.appliedDpr = dpr;
+
+    // 位图按 dpr * zoom 放大后，把逻辑坐标系还原成 400x400，绘制代码无需感知缩放
+    this.ctx.setTransform(
+      pixelWidth / this.logicalWidth,
+      0,
+      0,
+      pixelHeight / this.logicalHeight,
+      0,
+      0
+    );
   }
 
   public draw(state: {

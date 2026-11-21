@@ -35,9 +35,23 @@ Android 端共用同一套 Vue 3 + TypeScript 代码与 Canvas 渲染管线。
 - 5 套系统主题配色，Canvas 渲染与页面元素色彩联动。
 - Web Audio API 实时合成音效，支持一键静音。
 - 移动端全屏触摸操作、安全内边距与 Retina 自适应。
+- 网页端 / 桌面端画布放大，按真实显示尺寸重建位图，放大不发虚（移动端保持原样）。
 - 纯逻辑引擎与渲染层解耦，可脱离 Vue 单测与复用。
 - Mulberry32 PRNG 与后端 C++ 重放引擎比特级对齐，服务端重放验证分数。
 - 分数提交按 HTTP 状态码分级重试，避免网络抖动导致成绩丢失。
+
+### 桌面端与网页端的画布放大
+
+手机端画布已铺满屏幕，桌面端与网页端默认保持 400×400。游戏页得分栏右侧提供
+「放大 / 还原」按钮，仅在非移动端显示：
+
+- 放大后的边长取 `min(视口宽度 - 32, 900, 视口高度 - 160)`；窗口空间不足或
+  放大收益小于 24px 时按钮自动隐藏，并把状态复位；
+- 放大不是 CSS 拉伸：`Renderer` 按 `逻辑尺寸 × 缩放 × devicePixelRatio` 重建位图，
+  坐标系统一通过 `setTransform` 还原为 400×400，绘制代码无需感知缩放；
+- `ResizeObserver` 监听画布真实 CSS 宽度，窗口缩放或在游戏中切换放大状态都会同步
+  位图分辨率与重绘，画面保持清晰；
+- 移动端（Capacitor 与手机浏览器）不显示该按钮，布局与尺寸保持与旧版本一致。
 
 ## 技术栈
 
@@ -57,7 +71,7 @@ Android 端共用同一套 Vue 3 + TypeScript 代码与 Canvas 渲染管线。
 src/
 ├── game/                  # 游戏核心引擎（纯逻辑，无 Vue 依赖）
 │   ├── SnakeEngine.ts     # 物理推进、碰撞检测、动作录制
-│   ├── Renderer.ts        # Canvas 渲染（主题皮肤、Retina、穿墙特效）
+│   ├── Renderer.ts        # Canvas 渲染（主题皮肤、Retina、穿墙特效、缩放位图）
 │   ├── AutoPilot.ts       # AI 寻路（BFS 贪心 + 安全校验）
 │   └── PRNG.ts            # Mulberry32 伪随机（与 C++ 后端比特级对齐）
 ├── composables/
@@ -72,7 +86,7 @@ src/
 ├── config/
 │   └── site.ts            # 站点信息、仓库地址、ICP 备案号、玩法开关
 ├── utils/
-│   ├── runtime.ts         # Tauri / Capacitor / Web 运行时探测
+│   ├── runtime.ts         # Tauri / Capacitor / Web 运行时探测与移动端判定
 │   ├── api.ts             # 跨端 HTTP 封装（三端网络适配）
 │   └── audio.ts           # 音效管理器（预生成 AudioBuffer + 心跳保活）
 ├── router/                # 路由与展示模式守卫

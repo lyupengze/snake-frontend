@@ -2,12 +2,32 @@
   <div class="game-view">
     <div class="header">
       <h2 class="score-board">{{ modeText }} - 得分: {{ score }}</h2>
-      <button class="mute-btn" @click="toggleMute">
-        {{ isMuted ? '🔇' : '🔊' }}
-      </button>
+      <div class="header-actions">
+        <button
+          v-if="canEnlarge"
+          type="button"
+          class="zoom-btn"
+          :class="{ active: isEnlarged }"
+          :aria-pressed="isEnlarged"
+          :aria-label="isEnlarged ? '恢复默认游戏画面大小' : '放大游戏画面'"
+          :title="isEnlarged ? '恢复默认大小' : '放大游戏画面'"
+          @click="toggleEnlarge"
+        >
+          <span aria-hidden="true">🔍</span>
+          <span>{{ isEnlarged ? '还原' : '放大' }}</span>
+        </button>
+        <button
+          type="button"
+          class="mute-btn"
+          :aria-label="isMuted ? '取消静音' : '静音'"
+          @click="toggleMute"
+        >
+          {{ isMuted ? '🔇' : '🔊' }}
+        </button>
+      </div>
     </div>
 
-    <div class="canvas-wrapper">
+    <div class="canvas-wrapper" :style="{ width: canvasDisplaySize + 'px' }">
       <canvas ref="canvasRef" width="400" height="400" class="game-canvas"></canvas>
 
       <!-- 等待开始 -->
@@ -67,11 +87,16 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useSnakeGame } from '../composables/useSnakeGame';
 import Toast from '../components/Toast.vue';
 import { audioManager } from '../utils/audio';
+import { isMobileDevice } from '../utils/runtime';
+
+const CANVAS_SIZE = 400;
+// 放大后至少要多出这么多像素，否则按钮没有实际意义
+const MIN_ENLARGE_GAIN = 24;
 
 const router = useRouter();
 const route = useRoute();
@@ -85,7 +110,46 @@ const currentTheme = ref(localStorage.getItem('snake_theme') || 'classic');
 
 const isDailyMode = computed(() => route.query.mode === 'daily');
 const isWrapMode = computed(() => route.query.mode === 'wrap');
-const { score, gameStatus, startGame, stopGame, submitScore } = useSnakeGame();
+const { score, gameStatus, startGame, stopGame, setZoom, submitScore } = useSnakeGame();
+
+// ---------- 网页端 / 桌面端画布放大 ----------
+const isEnlarged = ref(false);
+const viewport = ref({ width: window.innerWidth, height: window.innerHeight });
+
+const updateViewport = () => {
+  viewport.value = { width: window.innerWidth, height: window.innerHeight };
+};
+
+// 左右各留 16px 内边距
+const availableWidth = computed(() => Math.max(160, viewport.value.width - 32));
+// 默认尺寸：桌面端 400px，窄屏时跟随容器收缩
+const baseCanvasSize = computed(() => Math.min(CANVAS_SIZE, availableWidth.value));
+// 放大尺寸：预留 160px 给得分栏、页脚等页面框架，并限制最大 900px
+const maxCanvasSize = computed(() =>
+  Math.max(baseCanvasSize.value, Math.min(availableWidth.value, 900, viewport.value.height - 160))
+);
+const canEnlarge = computed(
+  () => !isMobileDevice && maxCanvasSize.value >= baseCanvasSize.value + MIN_ENLARGE_GAIN
+);
+const canvasDisplaySize = computed(() =>
+  isEnlarged.value && canEnlarge.value ? maxCanvasSize.value : baseCanvasSize.value
+);
+
+watch(canEnlarge, (value) => {
+  if (!value) isEnlarged.value = false;
+});
+
+const toggleEnlarge = () => {
+  if (!canEnlarge.value) return;
+  isEnlarged.value = !isEnlarged.value;
+};
+
+// 画布实际 CSS 尺寸变化时，同步 Renderer 的位图分辨率，避免放大后发虚
+let resizeObserver = null;
+const syncCanvasScale = (cssWidth) => {
+  if (!cssWidth || !Number.isFinite(cssWidth)) return;
+  setZoom(cssWidth / CANVAS_SIZE);
+};
 
 const changeTheme = (t) => {
   currentTheme.value = t;
@@ -106,7 +170,9 @@ const handleStart = async () => {
   isRetryExhausted.value = false;
   if (canvasRef.value) {
     const currentMode = isDailyMode.value ? 'daily' : isWrapMode.value ? 'wrap' : 'classic';
-    const result = await startGame(canvasRef.value, currentMode, currentTheme.value);
+    // 直接读取真实 CSS 尺寸，保证位图分辨率与当前显示尺寸一致
+    const zoom = canvasRef.value.clientWidth / CANVAS_SIZE || 1;
+    const result = await startGame(canvasRef.value, currentMode, currentTheme.value, zoom);
     if (!result.success) {
       toastRef.value?.show(result.message);
     }
@@ -153,7 +219,24 @@ const saveScore = async () => {
   }
 };
 
-onUnmounted(() => stopGame());
+onMounted(() => {
+  window.addEventListener('resize', updateViewport);
+
+  // 监听画布真实显示尺寸（含窗口缩放、放大按钮切换），保持位图清晰
+  if (canvasRef.value && typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width) syncCanvasScale(width);
+    });
+    resizeObserver.observe(canvasRef.value);
+  }
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateViewport);
+  resizeObserver?.disconnect();
+  stopGame();
+});
 </script>
 
 <style scoped>
@@ -197,21 +280,52 @@ onUnmounted(() => stopGame());
   opacity: 1;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 14px;
+  line-height: 1;
+  color: #4caf50;
+  background: transparent;
+  border: 1px solid #4caf50;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.zoom-btn:hover {
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.zoom-btn.active {
+  color: #111;
+  background: #4caf50;
+}
+
 .canvas-wrapper {
   position: relative;
-  width: 100%;
-  max-width: 400px;
+  width: 400px;
+  max-width: 100%;
   display: flex;
   justify-content: center;
 }
 
 .game-canvas {
+  box-sizing: border-box;
   border: 2px solid #555;
   background-color: #000;
   display: block;
   touch-action: none;
   width: 100%;
-  max-width: 400px;
   height: auto;
   aspect-ratio: 1 / 1;
 }

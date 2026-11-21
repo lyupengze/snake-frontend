@@ -107,7 +107,8 @@ export function useSnakeGame() {
   const startGame = async (
     canvasElement: HTMLCanvasElement,
     mode: GameMode = 'classic',
-    theme: string = 'classic'
+    theme: string = 'classic',
+    zoom = 1
   ): Promise<StartGameResult> => {
     if (isStarting) return { success: false, message: '正在启动中，请勿重复点击' };
     isStarting = true;
@@ -131,7 +132,13 @@ export function useSnakeGame() {
 
       if (typeof data.seed !== 'number') throw new Error('Invalid seed from server');
 
-      initAndRun(canvasElement, new SnakeEngine(20, 400, serverSeed, safeMode), safeMode, theme);
+      initAndRun(
+        canvasElement,
+        new SnakeEngine(20, 400, serverSeed, safeMode),
+        safeMode,
+        theme,
+        zoom
+      );
       return { success: true };
     } catch (e) {
       console.error('[API Error] 启动游戏失败:', e);
@@ -146,12 +153,13 @@ export function useSnakeGame() {
     canvasElement: HTMLCanvasElement,
     newEngine: SnakeEngine,
     mode: GameMode,
-    theme: string
+    theme: string,
+    zoom: number
   ) => {
     stopGame();
     canvasEl = canvasElement;
     engine = newEngine;
-    renderer = new Renderer(canvasElement, 20, theme, mode);
+    renderer = new Renderer(canvasElement, 20, theme, mode, zoom);
 
     score.value = 0;
     retryCount = 0;
@@ -174,6 +182,14 @@ export function useSnakeGame() {
     window.removeEventListener('touchmove', handleTouchMove);
 
     if (!isGameOver) gameStatus.value = 'idle';
+  };
+
+  // 画布尺寸变化时同步渲染分辨率，并按当前状态立即重绘，无需等待下一帧
+  const setZoom = (zoom: number) => {
+    if (!renderer) return;
+    if (renderer.setZoom(zoom) && engine) {
+      renderer.draw(engine);
+    }
   };
 
   onUnmounted(() => stopGame());
@@ -236,6 +252,7 @@ export function useSnakeGame() {
     gameStatus,
     startGame,
     stopGame,
+    setZoom,
     submitScore,
   };
 }

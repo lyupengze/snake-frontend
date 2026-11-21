@@ -19,3 +19,23 @@ export const isCapacitor =
   !!capacitor && typeof capacitor.getPlatform === 'function' && capacitor.getPlatform() !== 'web';
 
 export const isNative = isTauri || isCapacitor;
+
+const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+
+// 手机/平板浏览器：UA 命中，或主指针为粗指针（无 hover）时视为移动端。
+// Tauri 桌面端忽略粗指针判断，避免带触屏的 Windows 设备被误判为移动端。
+const isMobileUserAgent = /Android|iPhone|iPad|iPod|Mobile|HarmonyOS|Windows Phone/i.test(
+  userAgent
+);
+
+const isCoarsePointer =
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+/**
+ * 是否运行在移动端（Capacitor Android/iOS 或手机浏览器）。
+ *
+ * 用于只对网页端/桌面端开放的界面能力（例如游戏画布放大）。
+ */
+export const isMobileDevice = isCapacitor || isMobileUserAgent || (!isTauri && isCoarsePointer);
